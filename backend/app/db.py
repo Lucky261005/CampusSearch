@@ -26,6 +26,22 @@ CREATE TABLE IF NOT EXISTS documents (
     fetched_at       TIMESTAMPTZ,
     updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- shortcut: no ANN index; exact cosine scan is correct and fast for a small corpus.
+-- Add HNSW (with pgvector iterative scans for filtered queries) past ~100k chunks.
+CREATE TABLE IF NOT EXISTS chunks (
+    id           TEXT PRIMARY KEY,                -- "<document_id>:<position>"
+    document_id  TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    position     INTEGER NOT NULL,
+    page         INTEGER,
+    content      TEXT NOT NULL,
+    content_hash TEXT NOT NULL,                   -- hash of the embedded text
+    model        TEXT NOT NULL,
+    embedding    vector(384) NOT NULL,
+    UNIQUE (document_id, position)
+);
 """
 
 COLUMNS = list(Document.model_fields)

@@ -27,6 +27,7 @@ class Document(BaseModel):
 
 class SearchHit(BaseModel):
     id: str
+    chunk_id: str | None  # set for semantic/hybrid hits backed by an embedded chunk
     title: str
     source_url: str
     source_type: SourceType
@@ -47,3 +48,30 @@ class SearchResponse(BaseModel):
     limit: int
     offset: int
     results: list[SearchHit]
+
+
+class Citation(BaseModel):
+    n: int
+    document_id: str
+    chunk_id: str | None
+    title: str
+    source_url: str
+    provenance: Provenance
+    provenance_label: str
+    page: int | None
+    excerpt: str
+    quote: str | None = None  # verified verbatim substring of excerpt
+
+
+class SourcePassage(Citation):
+    score: float
+
+
+class AskResponse(BaseModel):
+    question: str
+    status: Literal["answered", "insufficient_evidence", "fallback"]
+    answer: str | None
+    message: str
+    citations: list[Citation]
+    sources: list[SourcePassage]
+    retrieval: dict

@@ -29,7 +29,8 @@ def test_response_structure(client):
     assert body.keys() == {"query", "mode", "total", "limit", "offset", "results"}
     assert body["mode"] == "keyword" and body["limit"] == 10 and body["offset"] == 0
     hit = body["results"][0]
-    assert set(hit) == {"id", "title", "source_url", "source_type", "provenance", "campus",
+    assert hit["chunk_id"] is None  # keyword hits are document-level
+    assert set(hit) == {"id", "chunk_id", "title", "source_url", "source_type", "provenance", "campus",
                         "category", "programme", "semester", "publication_date", "score",
                         "snippet"}
     assert hit["provenance"] == "illustrative" and "calendar" in hit["snippet"].lower()
@@ -87,7 +88,7 @@ def test_empty_and_unknown_queries(client):
 
 @pytest.mark.parametrize("params", [
     {"limit": 0}, {"limit": 51}, {"offset": -1}, {"semester": 0}, {"semester": "x"},
-    {"mode": "semantic"}, {"date_from": "not-a-date"}, {"q": "a" * 501},
+    {"mode": "vector"}, {"date_from": "not-a-date"}, {"q": "a" * 501},
 ])
 def test_invalid_params_422(client, params):
     assert client.get("/api/search", params={"q": "fee", **params}).status_code == 422

@@ -86,39 +86,101 @@ def load_json_records(path: Path) -> list[dict]:
 
 
 class _TextExtractor(HTMLParser):
-    SKIP = {"script", "style", "noscript", "nav", "header", "footer", "svg"}
+    """Collects text blocks, skipping boilerplate regions; tracks <main>/<article> separately."""
+
+    SKIP_TAGS = {"script", "style", "noscript", "template", "svg", "nav", "header", "footer",
+                 "aside", "form", "iframe", "button", "select"}
+    # class/id words that mark site chrome rather than page content
+    SKIP_ATTR = re.compile(
+        r"(?:^|[\s_-])(nav|navbar|menu|footer|header|sidebar|breadcrumbs?|cookie|modal|popup|"
+        r"social|offcanvas|skip-link)(?:$|[\s_-])", re.I)
+    MAIN_TAGS = {"main", "article"}
+    VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
+            "source", "track", "wbr"}
+    BLOCK = {"p", "div", "section", "li", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6",
+             "td", "th", "tr", "table", "br", "dd", "dt", "blockquote", "pre", "main", "article"}
 
     def __init__(self) -> None:
-        super().__init__()
-        self.parts: list[str] = []
+        super().__init__(convert_charrefs=True)
         self.title = ""
-        self._skip = 0
+        self.blocks: list[str] = []       # all non-skipped blocks
+        self.main_blocks: list[str] = []  # blocks inside <main>/<article>/role=main
+        self._buf: list[str] = []
+        self._skip: list[str] = []        # open skipped tags (innermost last)
+        self._main: list[str] = []
         self._in_title = False
 
+    def _flush(self) -> None:
+        text = normalize_text(" ".join(self._buf))
+        self._buf = []
+        if text:
+            self.blocks.append(text)
+            if self._main:
+                self.main_blocks.append(text)
+
     def handle_starttag(self, tag, attrs):
-        if tag in self.SKIP:
-            self._skip += 1
-        self._in_title = tag == "title"
+        if tag == "title":
+            self._in_title = True
+            return
+        if tag in self.VOID:
+            if tag == "br":
+                self._flush()
+            return
+        if self._skip:
+            self._skip.append(tag)
+            return
+        a = dict(attrs)
+        marker = f"{a.get('class') or ''} {a.get('id') or ''} {a.get('role') or ''}"
+        if (tag in self.SKIP_TAGS or self.SKIP_ATTR.search(marker)
+                or a.get("role") in ("navigation", "banner", "contentinfo")):
+            self._flush()
+            self._skip.append(tag)
+            return
+        if tag in self.BLOCK:
+            self._flush()
+        if tag in self.MAIN_TAGS or a.get("role") == "main":
+            self._main.append(tag)
 
     def handle_endtag(self, tag):
-        if tag in self.SKIP and self._skip:
-            self._skip -= 1
         if tag == "title":
             self._in_title = False
+            return
+        if self._skip:
+            # pop to the matching open tag; tolerates unclosed children
+            if tag in self._skip:
+                while self._skip and self._skip.pop() != tag:
+                    pass
+            return
+        if tag in self.BLOCK:
+            self._flush()
+        if self._main and tag == self._main[-1]:
+            self._main.pop()
 
     def handle_data(self, data):
         if self._in_title:
             self.title += data
         elif not self._skip:
-            self.parts.append(data)
+            self._buf.append(data)
+
+    def text(self) -> str:
+        self._flush()
+        blocks = self.main_blocks or self.blocks
+        seen: set[str] = set()
+        out = []
+        for b in blocks:  # repeated blocks (menus, carousels) are kept once
+            if b.casefold() not in seen:
+                seen.add(b.casefold())
+                out.append(b)
+        return " ".join(out)
 
 
 def html_to_record(html: str, url: str) -> dict:
     parser = _TextExtractor()
     parser.feed(html)
+    parser.close()
     return {
-        "title": parser.title or url,
-        "content": " ".join(parser.parts),
+        "title": normalize_text(parser.title) or url,
+        "content": parser.text(),
         "source_url": url,
         "source_type": "html",
         "provenance": "official_web",

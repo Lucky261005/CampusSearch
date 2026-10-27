@@ -1,3 +1,5 @@
+import hashlib
+import math
 import os
 
 import psycopg
@@ -18,15 +20,44 @@ def _test_db() -> str:
         with psycopg.connect(f"{base}/postgres", autocommit=True, connect_timeout=3) as c:
             if not c.execute("SELECT 1 FROM pg_database WHERE datname = %s", (name,)).fetchone():
                 c.execute(f'CREATE DATABASE "{name}"')
+            # test DB only: skip commit fsync (slow on Docker/WSL2 volumes)
+            c.execute(f'ALTER DATABASE "{name}" SET synchronous_commit = off')
     except psycopg.OperationalError as e:
         pytest.skip(f"PostgreSQL not available: {e}")
     return TEST_DATABASE_URL
+
+
+class FakeEmbedder:
+    """Test-only stand-in: hashed bag-of-words, 384-dim, unit length. Never used at runtime."""
+
+    name = "fake-test-model"
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def encode(self, texts: list[str]) -> list[list[float]]:
+        from app.search import tokenize
+
+        self.calls += 1
+        out = []
+        for t in texts:
+            v = [0.0] * 384
+            for tok in tokenize(t):
+                v[int(hashlib.md5(tok.encode()).hexdigest(), 16) % 384] += 1.0
+            norm = math.sqrt(sum(x * x for x in v)) or 1.0
+            out.append([x / norm for x in v])
+        return out
+
+
+@pytest.fixture
+def fake_embedder() -> FakeEmbedder:
+    return FakeEmbedder()
 
 
 @pytest.fixture
 def conn(_test_db):
     with db.connect(_test_db) as c:
         db.init_schema(c)
-        c.execute("TRUNCATE documents")
+        c.execute("DELETE FROM documents")  # cascades to chunks; faster than TRUNCATE here
         c.commit()
         yield c

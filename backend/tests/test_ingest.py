@@ -44,13 +44,44 @@ def test_load_json_rejects_bad_files(tmp_path):
             load_json_records(tmp_path / name)
 
 
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
 def test_html_to_record_strips_scripts_and_nav():
     html = ("<html><head><title> Admissions </title><script>var x=1</script></head>"
             "<body><nav>Menu</nav><p>Apply online</p><footer>(c)</footer></body></html>")
     r = html_to_record(html, "https://example.org/a")
-    assert normalize_text(r["title"]) == "Admissions"
+    assert r["title"] == "Admissions"
     assert normalize_text(r["content"]) == "Apply online"
     assert r["provenance"] == "official_web" and r["fetched_at"]
+
+
+def test_html_prefers_main_content_and_drops_chrome():
+    r = html_to_record((FIXTURES / "page_with_main.html").read_text(), "https://example.org/adm")
+    assert r["title"] == "Admissions | Example University"
+    assert r["content"] == (
+        "Undergraduate Admissions "
+        "Applications are submitted online through the admissions portal. "
+        "Shortlisted applicants attend a personal interview. Results are emailed."
+    )
+    for noise in ["tracking", "cookies", "Home", "Related links", "Fest", "Copyright", "color"]:
+        assert noise not in r["content"]
+
+
+def test_html_without_main_drops_menus_footer_and_repeats():
+    r = html_to_record((FIXTURES / "page_without_main.html").read_text(), "https://example.org/lib")
+    assert r["content"] == ("Library Services Students may borrow books using their ID card. "
+                            "Late returns attract a fine.")
+
+
+def test_html_change_updates_document_hash(conn):
+    url = "https://example.org/adm"
+    html = (FIXTURES / "page_with_main.html").read_text()
+    assert ingest_document(conn, build_document(html_to_record(html, url))) == "inserted"
+    assert ingest_document(conn, build_document(html_to_record(html, url))) == "unchanged"
+    changed = html.replace("personal interview", "group discussion")
+    assert ingest_document(conn, build_document(html_to_record(changed, url))) == "updated"
+    assert "group discussion" in db.get_by_url(conn, url).content
 
 
 def test_fetch_html_rejects_non_http_and_unreachable():

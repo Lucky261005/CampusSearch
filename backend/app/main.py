@@ -4,10 +4,13 @@ from datetime import date
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from pydantic import BaseModel, Field, field_validator
 
-from app import db
-from app.models import Document, SearchHit, SearchResponse
-from app.search import SearchIndex, snippet
+from app import db, rag, retrieval
+from app.embeddings import Embedder, get_embedder
+from app.models import AskResponse, SearchHit, SearchResponse
+from app.retrieval import Filters
+from app.search import SearchIndex
 
 log = logging.getLogger("campussearch")
 
@@ -28,6 +31,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="CampusSearch API", lifespan=lifespan)
 
 
+def _index(request: Request) -> SearchIndex:
+    return getattr(request.app.state, "index", None) or SearchIndex()
+
+
+def _embedder(request: Request) -> Embedder | None:
+    """Injected embedder (tests) or the shared lazily-loaded model."""
+    if hasattr(request.app.state, "embedder"):
+        return request.app.state.embedder
+    return get_embedder()[0]
+
+
+def _conn(request: Request):
+    return db.connect(getattr(request.app.state, "db_url", db.DATABASE_URL))
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -37,8 +55,7 @@ def health() -> dict[str, str]:
 def search(
     request: Request,
     q: Annotated[str, Query(max_length=500)] = "",
-    # semantic / hybrid get added here in Phase 3
-    mode: Literal["keyword"] = "keyword",
+    mode: Literal["keyword", "semantic", "hybrid"] = "keyword",
     campus: str | None = None,
     category: str | None = None,
     programme: str | None = None,
@@ -50,39 +67,73 @@ def search(
 ) -> SearchResponse:
     if date_from and date_to and date_from > date_to:
         raise HTTPException(400, "date_from must be on or before date_to")
-    index: SearchIndex = getattr(request.app.state, "index", None) or SearchIndex()
+    filters = Filters(campus=campus, category=category, programme=programme,
+                      semester=semester, date_from=date_from, date_to=date_to)
 
-    def keep(d: Document) -> bool:
-        if campus and (d.campus or "").casefold() != campus.casefold():
-            return False
-        if category and (d.category or "").casefold() != category.casefold():
-            return False
-        if programme and (d.programme or "").casefold() != programme.casefold():
-            return False
-        if semester is not None and d.semester != semester:
-            return False
-        if (date_from or date_to) and d.publication_date is None:
-            return False
-        if date_from and d.publication_date < date_from:
-            return False
-        if date_to and d.publication_date > date_to:
-            return False
-        return True
+    if mode == "keyword":
+        passages = retrieval.keyword(_index(request), q, filters)
+    else:
+        embedder = _embedder(request)
+        if embedder is None:
+            raise HTTPException(503, f"{mode} search unavailable: embedding model not loaded")
+        try:
+            with _conn(request) as conn:
+                passages = (retrieval.semantic(conn, embedder, q, filters) if mode == "semantic"
+                            else retrieval.hybrid(conn, embedder, _index(request), q, filters))
+        except Exception as e:
+            log.warning("%s search failed: %s", mode, e)
+            raise HTTPException(503, f"{mode} search unavailable: database error") from None
 
-    hits = index.search(q, keep)
-    page = hits[offset : offset + limit]
+    page = passages[offset : offset + limit]
     return SearchResponse(
         query=q,
         mode=mode,
-        total=len(hits),
+        total=len(passages),
         limit=limit,
         offset=offset,
         results=[
             SearchHit(
-                **h.doc.model_dump(include=set(SearchHit.model_fields)),
-                score=round(h.score, 6),
-                snippet=snippet(h.doc.content, q),
+                **p.doc.model_dump(include=set(SearchHit.model_fields)),
+                chunk_id=p.chunk_id,
+                score=round(p.score, 6),
+                snippet=p.text if p.chunk_id is None else p.text[:300],
             )
-            for h in page
+            for p in page
         ],
     )
+
+
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+    filters: Filters = Filters()
+    top_k: int = Field(default=5, ge=1, le=8)
+
+    @field_validator("question")
+    @classmethod
+    def not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("question must not be blank")
+        return v.strip()
+
+
+@app.post("/api/ask", response_model=AskResponse)
+def ask(request: Request, body: AskRequest) -> AskResponse:
+    f = body.filters
+    if f.date_from and f.date_to and f.date_from > f.date_to:
+        raise HTTPException(400, "date_from must be on or before date_to")
+    embedder = _embedder(request)
+    info: dict = {"mode": "hybrid", "semantic_available": embedder is not None}
+    passages = None
+    if embedder is not None:
+        try:
+            with _conn(request) as conn:
+                passages = retrieval.hybrid(conn, embedder, _index(request), body.question, f)
+        except Exception as e:
+            log.warning("hybrid retrieval failed, using keyword: %s", e)
+    if passages is None:
+        info["mode"] = "keyword"
+        passages = retrieval.keyword(_index(request), body.question, f, width=1200)
+    passages = passages[: body.top_k]
+    info["retrieved"] = len(passages)
+    llm = getattr(request.app.state, "llm", rag.groq_chat)
+    return rag.answer(body.question, passages, llm, info)
