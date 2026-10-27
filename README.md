@@ -288,3 +288,9 @@ The answers are written to `evaluation/private/groq_ask_log.json`, which is giti
 
 `evaluation.run --groq` would make one request per benchmark question (up to 26). It also obeys the local
 limits and stops at the first limit, so run it only deliberately.
+
+## License
+
+CampusSearch's source code is licensed under the [MIT License](LICENSE). The licence covers this
+repository's code only. University documents that you fetch with the ingestion commands remain the property
+of their publishers and are not included in, or licensed by, this repository.
