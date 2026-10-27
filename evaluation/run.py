@@ -2,7 +2,8 @@
 
 Run from the repository root (Postgres up, corpus ingested and reindexed):
 
-    backend/.venv/Scripts/python -m evaluation.run            # Windows
+    backend/.venv/Scripts/python -m evaluation.run                  # Windows, v1 baseline
+    backend/.venv/Scripts/python -m evaluation.run --benchmark v2   # official corpus
     backend/.venv/bin/python -m evaluation.run                # Linux/macOS
 
 Options:
@@ -50,8 +51,17 @@ def norm(text: str) -> str:
     return " ".join(text.split()).casefold()
 
 
-def load_dataset() -> dict:
-    return json.loads((EVAL / "queries.json").read_text(encoding="utf-8"))
+# Each benchmark version keeps its own dataset, results and report; v1 is the Phase 5 baseline.
+BENCHMARKS = {
+    "v1": {"queries": EVAL / "queries.json", "json": EVAL / "results" / "results.json",
+           "md": EVAL / "RESULTS.md", "analysis": EVAL / "analysis.md"},
+    "v2": {"queries": EVAL / "v2" / "queries.json", "json": EVAL / "results" / "v2" / "results.json",
+           "md": EVAL / "RESULTS_v2.md", "analysis": EVAL / "v2" / "analysis.md"},
+}
+
+
+def load_dataset(path: Path = BENCHMARKS["v1"]["queries"]) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def validate_dataset(data: dict, docs: dict) -> None:
@@ -73,6 +83,7 @@ def snapshot(conn) -> dict:
         "documents": len(docs),
         "illustrative_documents": sum(d["provenance"] == "illustrative" for d in docs),
         "official_documents": sum(d["provenance"] == "official_web" for d in docs),
+        "supplied_documents": sum(d["provenance"] == "supplied_document" for d in docs),
         "chunks": len(chunks),
         "chunk_models": sorted({c["model"] for c in chunks}),
         "fingerprint": h,
@@ -114,6 +125,9 @@ def retrieve(mode, conn, embedder, index, q):
 
 def evaluate_retrieval(modes, conn, embedder, index, data) -> dict:
     names = {k: v["name"] for k, v in data["documents"].items()}
+    tag = {"illustrative": "ILL", "supplied_document": "SUP", "official_web": "OFF"}
+    for doc_id, d in index.docs.items():  # unjudged documents: readable, provenance-tagged
+        names.setdefault(doc_id, f"[{tag[d.provenance]}] {d.title.removeprefix('[Illustrative] ')[:32]}")
     out = {}
     for mode in modes:
         rows = []
@@ -331,18 +345,28 @@ def evaluate_groq(conn, embedder, index, data, price_in, price_out) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--benchmark", choices=sorted(BENCHMARKS), default="v1")
+    ap.add_argument("--overwrite", action="store_true",
+                    help="replace saved results even if they were measured on a different corpus")
     ap.add_argument("--repeats", type=int, default=5)
     ap.add_argument("--groq", action="store_true")
     ap.add_argument("--price-in", type=float)
     ap.add_argument("--price-out", type=float)
     args = ap.parse_args()
 
-    data = load_dataset()
+    paths = BENCHMARKS[args.benchmark]
+    data = load_dataset(paths["queries"])
     with db.connect() as conn:
         docs = {d.id: d for d in db.all_documents(conn)}
         validate_dataset(data, docs)
         index = SearchIndex(list(docs.values()))
         snap = snapshot(conn)
+        if paths["json"].exists() and not args.overwrite:
+            saved = json.loads(paths["json"].read_text(encoding="utf-8"))["corpus"]["fingerprint"]
+            if saved != snap["fingerprint"]:
+                sys.exit(f"refusing to overwrite: saved {args.benchmark} results were measured on corpus "
+                         f"{saved}, the database is now {snap['fingerprint']}. Saved results are kept "
+                         "as history; pass --overwrite to replace them deliberately.")
 
         t = time.perf_counter()
         embedder, error = get_embedder()
@@ -352,6 +376,7 @@ def main() -> None:
             raise DatasetError("chunks were not embedded with the current model; run python -m app.reindex")
 
         results = {
+            "benchmark": args.benchmark,
             "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "corpus": snap,
             "environment": environment(conn),
@@ -369,16 +394,16 @@ def main() -> None:
                      if args.groq else {"status": "not run", "reason": "pass --groq with GROQ_API_KEY set"}),
         }
 
-    out = EVAL / "results"
-    out.mkdir(exist_ok=True)
-    (out / "results.json").write_text(json.dumps(results, indent=2, default=str) + "\n", encoding="utf-8")
-    (EVAL / "RESULTS.md").write_text(render(results, data), encoding="utf-8")
+    paths["json"].parent.mkdir(parents=True, exist_ok=True)
+    paths["json"].write_text(json.dumps(results, indent=2, default=str) + "\n", encoding="utf-8")
+    paths["md"].write_text(render(results, data, paths["analysis"]), encoding="utf-8")
     for mode, m in results["retrieval"].items():
         lat = results["latency"]["modes"][mode]
         print(f"{mode:9s} R@5={m['recall@5']:.3f} nDCG@10={m['ndcg@10']:.3f} MRR={m['mrr']:.3f} "
               f"p50={lat['p50_ms']:.1f}ms p95={lat['p95_ms']:.1f}ms")
     print("RAG checks:", {k: f"{a}/{b}" for k, (a, b) in results["rag_checks"]["checks"].items()})
-    print("wrote evaluation/RESULTS.md and evaluation/results/results.json")
+    print(f"wrote {paths['md'].relative_to(ROOT).as_posix()} and "
+          f"{paths['json'].relative_to(ROOT).as_posix()}")
 
 
 if __name__ == "__main__":

@@ -3,9 +3,11 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-SourceType = Literal["json", "text", "html"]
-# "illustrative" = synthetic sample record, never to be shown as official information
-Provenance = Literal["official_web", "illustrative"]
+SourceType = Literal["json", "text", "html", "pdf"]
+# official_web      = fetched from an official university URL
+# supplied_document = file supplied locally whose official URL could not be verified
+# illustrative      = synthetic sample record, never to be shown as official information
+Provenance = Literal["official_web", "supplied_document", "illustrative"]
 
 
 class Document(BaseModel):
@@ -23,6 +25,9 @@ class Document(BaseModel):
     content_hash: str
     fetched_at: datetime | None = None
     updated_at: datetime | None = None
+    extraction_status: Literal["ok", "warnings"] = "ok"
+    extraction_note: str | None = None
+    page_starts: list[int] | None = None  # PDF: character offset where each page begins
 
 
 class SearchHit(BaseModel):

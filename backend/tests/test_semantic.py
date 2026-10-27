@@ -80,8 +80,10 @@ def test_reindex_handles_changed_shrunk_and_new_model(conn, fake_embedder):
     assert index_documents(conn, fake_embedder)["embedded"] == 3
 
     ingest_document(conn, build_document(rec("u:a", "hostel rules only")))
+    # stale chunks are removed with the update itself, not left until the next reindex
+    assert conn.execute("SELECT count(*) AS n FROM chunks").fetchone()["n"] == 0
     c = index_documents(conn, fake_embedder)
-    assert c["embedded"] == 1 and c["deleted"] == 2
+    assert c["embedded"] == 1 and c["deleted"] == 0
     assert conn.execute("SELECT content FROM chunks").fetchone()["content"] == "hostel rules only"
 
     fake_embedder.name = "fake-test-model-v2"

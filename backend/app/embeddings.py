@@ -2,6 +2,7 @@
 
 import hashlib
 import logging
+import os
 import threading
 from typing import Protocol
 
@@ -32,6 +33,17 @@ def chunk_text(content: str, size: int = CHUNK_WORDS, overlap: int = OVERLAP_WOR
     return chunks
 
 
+def chunk_document(content: str, page_starts: list[int] | None) -> list[tuple[int | None, str]]:
+    """(page, text) chunks. With page offsets, chunks never cross a page boundary."""
+    if not page_starts:
+        return [(None, c) for c in chunk_text(content)]
+    out = []
+    ends = page_starts[1:] + [len(content)]
+    for page, (start, end) in enumerate(zip(page_starts, ends), start=1):
+        out += [(page, c) for c in chunk_text(content[start:end])]
+    return out
+
+
 def embed_input(title: str, chunk: str) -> str:
     # title gives short chunks topical context
     return f"{title}. {chunk}"
@@ -50,7 +62,12 @@ class SentenceTransformerEmbedder:
         from sentence_transformers import SentenceTransformer
 
         self.name = name
-        self.model = SentenceTransformer(name)
+        try:  # cached weights first: no network round-trips when the model is already local
+            self.model = SentenceTransformer(name, local_files_only=True)
+        except OSError:
+            if os.getenv("HF_HUB_OFFLINE") == "1":
+                raise
+            self.model = SentenceTransformer(name)  # first run: download once
 
     def encode(self, texts: list[str]) -> list[list[float]]:
         vecs = self.model.encode(texts, normalize_embeddings=True, batch_size=32).tolist()

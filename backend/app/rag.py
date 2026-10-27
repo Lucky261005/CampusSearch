@@ -70,11 +70,16 @@ def groq_chat(messages: list[dict]) -> str:
 
 
 def label(p: Passage) -> str:
-    return "ILLUSTRATIVE sample, not official" if p.doc.provenance == "illustrative" else "official web page"
+    return {
+        "illustrative": "ILLUSTRATIVE sample, not official",
+        "supplied_document": "supplied document, official source not verified",
+        "official_web": "official web page",
+    }[p.doc.provenance]
 
 
 PROVENANCE_LABELS = {
     "illustrative": "Illustrative sample record, not official university information",
+    "supplied_document": "University document supplied locally; official source URL not verified",
     "official_web": "Official university web page",
 }
 

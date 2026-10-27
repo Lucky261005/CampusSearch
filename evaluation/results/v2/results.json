@@ -1,0 +1,1530 @@
+{
+  "benchmark": "v2",
+  "generated_at": "2026-10-27T19:18:05+00:00",
+  "corpus": {
+    "documents": 48,
+    "illustrative_documents": 12,
+    "official_documents": 33,
+    "supplied_documents": 3,
+    "chunks": 585,
+    "chunk_models": [
+      "sentence-transformers/all-MiniLM-L6-v2"
+    ],
+    "fingerprint": "ecdcc06fd3e76346"
+  },
+  "environment": {
+    "python": "3.13.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+    "cpu_count": 8,
+    "postgres": "PostgreSQL 16.15 (Debian 16.15-1.pgdg12+2) on x86_64-pc-linux-gnu",
+    "pgvector": "0.8.7",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "vector_search": "exact cosine scan (no ANN index)",
+    "torch": "2.7.1+cpu",
+    "torch_threads": 4,
+    "sentence_transformers": "4.1.0",
+    "device": "cpu"
+  },
+  "queries": {
+    "total": 25,
+    "by_type": {
+      "filtered": 2,
+      "hybrid": 4,
+      "keyword": 6,
+      "multi-document": 2,
+      "semantic": 7,
+      "unanswerable": 4
+    }
+  },
+  "semantic": {
+    "available": true,
+    "reason": null,
+    "model_load_s": 8.935
+  },
+  "retrieval": {
+    "keyword": {
+      "judged_queries": 21,
+      "unjudged_queries": [
+        "V2-U01",
+        "V2-U02",
+        "V2-U03",
+        "V2-U04"
+      ],
+      "recall@5": 0.8293650793650794,
+      "ndcg@10": 0.7697035054021727,
+      "mrr": 0.7492063492063492,
+      "by_type": {
+        "filtered": {
+          "n": 2,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "hybrid": {
+          "n": 4,
+          "recall@5": 0.5416666666666666,
+          "ndcg@10": 0.8471959812875574,
+          "mrr": 0.875
+        },
+        "keyword": {
+          "n": 6,
+          "recall@5": 1.0,
+          "ndcg@10": 0.9126533464253455,
+          "mrr": 0.9166666666666666
+        },
+        "multi-document": {
+          "n": 2,
+          "recall@5": 0.875,
+          "ndcg@10": 0.7580916492638854,
+          "mrr": 0.75
+        },
+        "semantic": {
+          "n": 7,
+          "recall@5": 0.7857142857142857,
+          "ndcg@10": 0.5404123301736504,
+          "mrr": 0.46190476190476193
+        }
+      },
+      "per_query": [
+        {
+          "id": "V2-K01",
+          "type": "keyword",
+          "query": "Deepavali holiday academic calendar",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6419288461539238,
+          "rr@10": 0.5,
+          "top3": [
+            "[ILL] Academic calendar overview, odd ",
+            "academic-calendar-2026-27",
+            "[ILL] Academic calendar overview, even"
+          ],
+          "returned": 23,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-K02",
+          "type": "keyword",
+          "query": "MBA last date to apply 2027",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "mba-admission-2027",
+            "academic-calendar-2026-27",
+            "admission-procedure"
+          ],
+          "returned": 22,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-K03",
+          "type": "keyword",
+          "query": "guest house cancellation refund",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "guest-house-cancellation",
+            "health-centre",
+            "[OFF] School of Sciences"
+          ],
+          "returned": 4,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-K04",
+          "type": "keyword",
+          "query": "Nagasandra metro station Yeshwanthpur campus",
+          "recall@5": 1.0,
+          "ndcg@10": 0.8339912323981488,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-yeshwanthpur",
+            "yeshwanthpur-campus",
+            "reach-delhi-ncr"
+          ],
+          "returned": 32,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-K05",
+          "type": "keyword",
+          "query": "OTR one time registration scholarship portal",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ssp-notice",
+            "nsp-notice",
+            "ug-pg-selection-2027"
+          ],
+          "returned": 29,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-K06",
+          "type": "keyword",
+          "query": "PM Vidyalaxmi education loan documents required",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "pm-vidyalaxmi-notice",
+            "pm-vidyalaxmi-poster",
+            "scholarship-cell"
+          ],
+          "returned": 25,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S01",
+          "type": "semantic",
+          "query": "how many library books can an undergraduate take out and for how long",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "[OFF] School of Sciences",
+            "[OFF] School of Business and Managemen"
+          ],
+          "returned": 38,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S02",
+          "type": "semantic",
+          "query": "how often do I have to be present in class to be allowed to sit the mid-term test",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "ug-pg-selection-2027",
+            "academic-calendar-2026-27"
+          ],
+          "returned": 28,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S03",
+          "type": "semantic",
+          "query": "where can I see a doctor on the central campus and when is it open",
+          "recall@5": 0.0,
+          "ndcg@10": 0.0,
+          "rr@10": 0.0,
+          "top3": [
+            "student-handbook-2026",
+            "school-engineering",
+            "[OFF] School of Sciences"
+          ],
+          "returned": 36,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S04",
+          "type": "semantic",
+          "query": "I lost my phone somewhere on campus, what happens to things that are found",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6309297535714575,
+          "rr@10": 0.5,
+          "top3": [
+            "international-students",
+            "safety-and-security",
+            "[OFF] School of Business and Managemen"
+          ],
+          "returned": 33,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S05",
+          "type": "semantic",
+          "query": "can I leave my degree part way through and come back later",
+          "recall@5": 1.0,
+          "ndcg@10": 0.38685280723454163,
+          "rr@10": 0.2,
+          "top3": [
+            "[OFF] School of Sciences",
+            "international-students",
+            "[OFF] School of Business and Managemen"
+          ],
+          "returned": 34,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S06",
+          "type": "semantic",
+          "query": "how large is the campus near Mysore Road",
+          "recall@5": 0.5,
+          "ndcg@10": 0.30451296789464855,
+          "rr@10": 0.2,
+          "top3": [
+            "[OFF] How to reach Bangalore Kengeri C",
+            "[OFF] Bangalore Central Campus",
+            "yeshwanthpur-campus"
+          ],
+          "returned": 35,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-S07",
+          "type": "semantic",
+          "query": "financial help from the state government for students living in Karnataka",
+          "recall@5": 1.0,
+          "ndcg@10": 0.4605907825149054,
+          "rr@10": 0.3333333333333333,
+          "top3": [
+            "pm-vidyalaxmi-poster",
+            "pm-vidyalaxmi-notice",
+            "scholarship-cell"
+          ],
+          "returned": 41,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-H01",
+          "type": "hybrid",
+          "query": "steps to apply online for admission",
+          "recall@5": 0.3333333333333333,
+          "ndcg@10": 0.6018373710319508,
+          "rr@10": 0.5,
+          "top3": [
+            "ssp-notice",
+            "admission-procedure",
+            "nsp-notice"
+          ],
+          "returned": 37,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-H02",
+          "type": "hybrid",
+          "query": "selection process 2027 for NRI and international applicants",
+          "recall@5": 0.5,
+          "ndcg@10": 0.9173194127129571,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-pg-selection-2027",
+            "mba-admission-2027",
+            "[ILL] Undergraduate admissions process"
+          ],
+          "returned": 25,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-H03",
+          "type": "hybrid",
+          "query": "nearest metro to reach the Delhi NCR campus",
+          "recall@5": 0.3333333333333333,
+          "ndcg@10": 0.8696271414053217,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-delhi-ncr",
+            "reach-yeshwanthpur",
+            "[OFF] How to reach Bangalore Bannergha"
+          ],
+          "returned": 32,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-H04",
+          "type": "hybrid",
+          "query": "counselling and mental health support for students",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "health-centre",
+            "student-engagement-centres",
+            "student-handbook-2026"
+          ],
+          "returned": 32,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-F01",
+          "type": "filtered",
+          "query": "how to reach the campus",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-pune-lavasa",
+            "pune-lavasa-campus"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-F02",
+          "type": "filtered",
+          "query": "scholarship application",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarship-cell",
+            "nsp-notice",
+            "ssp-notice"
+          ],
+          "returned": 5,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-M01",
+          "type": "multi-document",
+          "query": "convocation dates for the Bangalore campuses",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6653152460429406,
+          "rr@10": 0.5,
+          "top3": [
+            "[OFF] Class commencement dates of Bang",
+            "academic-calendar-2026-27",
+            "student-handbook-2026"
+          ],
+          "returned": 33,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-M02",
+          "type": "multi-document",
+          "query": "which government scholarship portals does the university help students with",
+          "recall@5": 0.75,
+          "ndcg@10": 0.8508680524848301,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarship-cell",
+            "pm-vidyalaxmi-poster",
+            "pm-vidyalaxmi-notice"
+          ],
+          "returned": 45,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-U01",
+          "type": "unanswerable",
+          "query": "How much is the hostel fee at the Kengeri campus?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "[ILL] Hostel accommodation guidelines",
+            "[OFF] How to reach Bangalore Bannergha",
+            "[OFF] School of Business and Managemen"
+          ],
+          "returned": 41,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-U02",
+          "type": "unanswerable",
+          "query": "What is the tuition fee per semester for BTech?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "[ILL] Tuition fee payment procedure",
+            "student-handbook-2026",
+            "school-engineering"
+          ],
+          "returned": 26,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-U03",
+          "type": "unanswerable",
+          "query": "What is the library Wi-Fi password?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "ug-pg-selection-2027",
+            "student-handbook-2026",
+            "pm-vidyalaxmi-notice"
+          ],
+          "returned": 31,
+          "top_similarity": null
+        },
+        {
+          "id": "V2-U04",
+          "type": "unanswerable",
+          "query": "What is the capital of Australia?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "international-students",
+            "[OFF] School of Business and Managemen",
+            "[OFF] School of Sciences"
+          ],
+          "returned": 6,
+          "top_similarity": null
+        }
+      ]
+    },
+    "semantic": {
+      "judged_queries": 21,
+      "unjudged_queries": [
+        "V2-U01",
+        "V2-U02",
+        "V2-U03",
+        "V2-U04"
+      ],
+      "recall@5": 0.9126984126984128,
+      "ndcg@10": 0.9158454913156808,
+      "mrr": 0.9380952380952381,
+      "by_type": {
+        "filtered": {
+          "n": 2,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "hybrid": {
+          "n": 4,
+          "recall@5": 0.9166666666666666,
+          "ndcg@10": 0.9060388377217937,
+          "mrr": 1.0
+        },
+        "keyword": {
+          "n": 6,
+          "recall@5": 0.9166666666666666,
+          "ndcg@10": 0.923041925637825,
+          "mrr": 0.9166666666666666
+        },
+        "multi-document": {
+          "n": 2,
+          "recall@5": 1.0,
+          "ndcg@10": 0.9053176749599346,
+          "mrr": 1.0
+        },
+        "semantic": {
+          "n": 7,
+          "recall@5": 0.8571428571428571,
+          "ndcg@10": 0.8942447232850437,
+          "mrr": 0.8857142857142858
+        }
+      },
+      "per_query": [
+        {
+          "id": "V2-K01",
+          "type": "keyword",
+          "query": "Deepavali holiday academic calendar",
+          "recall@5": 0.5,
+          "ndcg@10": 0.9073218002554915,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-2026-27",
+            "[ILL] Academic calendar overview, odd ",
+            "[ILL] Academic calendar overview, even"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5779259019074674
+        },
+        {
+          "id": "V2-K02",
+          "type": "keyword",
+          "query": "MBA last date to apply 2027",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6309297535714575,
+          "rr@10": 0.5,
+          "top3": [
+            "academic-calendar-2026-27",
+            "mba-admission-2027",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6797088170398741
+        },
+        {
+          "id": "V2-K03",
+          "type": "keyword",
+          "query": "guest house cancellation refund",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "guest-house-cancellation",
+            "student-handbook-2026",
+            "academic-calendar-2026-27"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6547729167206845
+        },
+        {
+          "id": "V2-K04",
+          "type": "keyword",
+          "query": "Nagasandra metro station Yeshwanthpur campus",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "yeshwanthpur-campus",
+            "reach-yeshwanthpur",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7669910927420326
+        },
+        {
+          "id": "V2-K05",
+          "type": "keyword",
+          "query": "OTR one time registration scholarship portal",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ssp-notice",
+            "nsp-notice",
+            "scholarship-cell"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5809606466959761
+        },
+        {
+          "id": "V2-K06",
+          "type": "keyword",
+          "query": "PM Vidyalaxmi education loan documents required",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "pm-vidyalaxmi-poster",
+            "pm-vidyalaxmi-notice",
+            "scholarship-cell"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7287554144859314
+        },
+        {
+          "id": "V2-S01",
+          "type": "semantic",
+          "query": "how many library books can an undergraduate take out and for how long",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "academic-calendar-2026-27",
+            "[ILL] Library services and borrowing"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6583559513092041
+        },
+        {
+          "id": "V2-S02",
+          "type": "semantic",
+          "query": "how often do I have to be present in class to be allowed to sit the mid-term test",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "[ILL] Attendance requirement guideline",
+            "[OFF] Office of Examinations"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5567237402961419
+        },
+        {
+          "id": "V2-S03",
+          "type": "semantic",
+          "query": "where can I see a doctor on the central campus and when is it open",
+          "recall@5": 0.5,
+          "ndcg@10": 0.9552000951006567,
+          "rr@10": 1.0,
+          "top3": [
+            "health-centre",
+            "academic-calendar-2026-27",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5106046199798584
+        },
+        {
+          "id": "V2-S04",
+          "type": "semantic",
+          "query": "I lost my phone somewhere on campus, what happens to things that are found",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "safety-and-security",
+            "student-handbook-2026",
+            "[OFF] Bangalore Central Campus"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5298863929577841
+        },
+        {
+          "id": "V2-S05",
+          "type": "semantic",
+          "query": "can I leave my degree part way through and come back later",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "entry-exit-guidelines",
+            "student-handbook-2026",
+            "academic-calendar-2026-27"
+          ],
+          "returned": 48,
+          "top_similarity": 0.4994495809406301
+        },
+        {
+          "id": "V2-S06",
+          "type": "semantic",
+          "query": "how large is the campus near Mysore Road",
+          "recall@5": 0.5,
+          "ndcg@10": 0.30451296789464855,
+          "rr@10": 0.2,
+          "top3": [
+            "student-handbook-2026",
+            "[OFF] How to reach Bangalore Kengeri C",
+            "reach-yeshwanthpur"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5935609340667725
+        },
+        {
+          "id": "V2-S07",
+          "type": "semantic",
+          "query": "financial help from the state government for students living in Karnataka",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ssp-notice",
+            "scholarship-cell",
+            "nsp-notice"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6037678831038695
+        },
+        {
+          "id": "V2-H01",
+          "type": "hybrid",
+          "query": "steps to apply online for admission",
+          "recall@5": 0.6666666666666666,
+          "ndcg@10": 0.7984848580994974,
+          "rr@10": 1.0,
+          "top3": [
+            "admission-procedure",
+            "[ILL] Undergraduate admissions process",
+            "ug-pg-selection-2027"
+          ],
+          "returned": 48,
+          "top_similarity": 0.690897960013274
+        },
+        {
+          "id": "V2-H02",
+          "type": "hybrid",
+          "query": "selection process 2027 for NRI and international applicants",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9828422279067397,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-pg-selection-2027",
+            "student-handbook-2026",
+            "international-students"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6950880056514782
+        },
+        {
+          "id": "V2-H03",
+          "type": "hybrid",
+          "query": "nearest metro to reach the Delhi NCR campus",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-delhi-ncr",
+            "student-handbook-2026",
+            "delhi-ncr-campus"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7353601017379713
+        },
+        {
+          "id": "V2-H04",
+          "type": "hybrid",
+          "query": "counselling and mental health support for students",
+          "recall@5": 1.0,
+          "ndcg@10": 0.8428282648809379,
+          "rr@10": 1.0,
+          "top3": [
+            "student-engagement-centres",
+            "health-centre",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.423523485660553
+        },
+        {
+          "id": "V2-F01",
+          "type": "filtered",
+          "query": "how to reach the campus",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-pune-lavasa",
+            "pune-lavasa-campus"
+          ],
+          "returned": 2,
+          "top_similarity": 0.4761375799097082
+        },
+        {
+          "id": "V2-F02",
+          "type": "filtered",
+          "query": "scholarship application",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarship-cell",
+            "ssp-notice",
+            "nsp-notice"
+          ],
+          "returned": 5,
+          "top_similarity": 0.6582186033465143
+        },
+        {
+          "id": "V2-M01",
+          "type": "multi-document",
+          "query": "convocation dates for the Bangalore campuses",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-2026-27",
+            "student-handbook-2026",
+            "[OFF] Class commencement dates of Bang"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7421394605304097
+        },
+        {
+          "id": "V2-M02",
+          "type": "multi-document",
+          "query": "which government scholarship portals does the university help students with",
+          "recall@5": 1.0,
+          "ndcg@10": 0.8106353499198693,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "scholarship-cell",
+            "[ILL] Scholarships and financial aid"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6545521822838686
+        },
+        {
+          "id": "V2-U01",
+          "type": "unanswerable",
+          "query": "How much is the hostel fee at the Kengeri campus?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "[ILL] Hostel accommodation guidelines",
+            "[OFF] How to reach Bangalore Kengeri C",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5307769179344177
+        },
+        {
+          "id": "V2-U02",
+          "type": "unanswerable",
+          "query": "What is the tuition fee per semester for BTech?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "student-handbook-2026",
+            "[ILL] Tuition fee payment procedure",
+            "scholarship-cell"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6473879428274677
+        },
+        {
+          "id": "V2-U03",
+          "type": "unanswerable",
+          "query": "What is the library Wi-Fi password?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "student-handbook-2026",
+            "[ILL] Library services and borrowing",
+            "[OFF] Bangalore Central Campus"
+          ],
+          "returned": 48,
+          "top_similarity": 0.39204880595207214
+        },
+        {
+          "id": "V2-U04",
+          "type": "unanswerable",
+          "query": "What is the capital of Australia?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "student-handbook-2026",
+            "[OFF] Student Council",
+            "student-engagement-centres"
+          ],
+          "returned": 48,
+          "top_similarity": 0.2789514577701264
+        }
+      ]
+    },
+    "hybrid": {
+      "judged_queries": 21,
+      "unjudged_queries": [
+        "V2-U01",
+        "V2-U02",
+        "V2-U03",
+        "V2-U04"
+      ],
+      "recall@5": 0.8849206349206349,
+      "ndcg@10": 0.8853794640293347,
+      "mrr": 0.8785714285714286,
+      "by_type": {
+        "filtered": {
+          "n": 2,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "hybrid": {
+          "n": 4,
+          "recall@5": 0.7083333333333333,
+          "ndcg@10": 0.9393140225158538,
+          "mrr": 1.0
+        },
+        "keyword": {
+          "n": 6,
+          "recall@5": 1.0,
+          "ndcg@10": 0.9272289905047701,
+          "mrr": 0.9166666666666666
+        },
+        "multi-document": {
+          "n": 2,
+          "recall@5": 0.875,
+          "ndcg@10": 0.9221557166686147,
+          "mrr": 1.0
+        },
+        "semantic": {
+          "n": 7,
+          "recall@5": 0.8571428571428571,
+          "ndcg@10": 0.7754324683123945,
+          "mrr": 0.7071428571428572
+        }
+      },
+      "per_query": [
+        {
+          "id": "V2-K01",
+          "type": "keyword",
+          "query": "Deepavali holiday academic calendar",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9324441894571632,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-2026-27",
+            "[ILL] Academic calendar overview, odd ",
+            "[ILL] Academic calendar overview, even"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5779259019074674
+        },
+        {
+          "id": "V2-K02",
+          "type": "keyword",
+          "query": "MBA last date to apply 2027",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6309297535714575,
+          "rr@10": 0.5,
+          "top3": [
+            "academic-calendar-2026-27",
+            "mba-admission-2027",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6797088170398741
+        },
+        {
+          "id": "V2-K03",
+          "type": "keyword",
+          "query": "guest house cancellation refund",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "guest-house-cancellation",
+            "student-handbook-2026",
+            "health-centre"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6547729167206845
+        },
+        {
+          "id": "V2-K04",
+          "type": "keyword",
+          "query": "Nagasandra metro station Yeshwanthpur campus",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "yeshwanthpur-campus",
+            "reach-yeshwanthpur",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7669910927420326
+        },
+        {
+          "id": "V2-K05",
+          "type": "keyword",
+          "query": "OTR one time registration scholarship portal",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ssp-notice",
+            "nsp-notice",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5809606466959761
+        },
+        {
+          "id": "V2-K06",
+          "type": "keyword",
+          "query": "PM Vidyalaxmi education loan documents required",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "pm-vidyalaxmi-notice",
+            "pm-vidyalaxmi-poster",
+            "scholarship-cell"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7287554144859314
+        },
+        {
+          "id": "V2-S01",
+          "type": "semantic",
+          "query": "how many library books can an undergraduate take out and for how long",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "[OFF] School of Business and Managemen",
+            "[ILL] Library services and borrowing"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6583559513092041
+        },
+        {
+          "id": "V2-S02",
+          "type": "semantic",
+          "query": "how often do I have to be present in class to be allowed to sit the mid-term test",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "student-handbook-2026",
+            "ug-pg-selection-2027",
+            "academic-calendar-2026-27"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5567237402961419
+        },
+        {
+          "id": "V2-S03",
+          "type": "semantic",
+          "query": "where can I see a doctor on the central campus and when is it open",
+          "recall@5": 0.5,
+          "ndcg@10": 0.3950679673211227,
+          "rr@10": 0.25,
+          "top3": [
+            "student-handbook-2026",
+            "academic-calendar-2026-27",
+            "international-students"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5106046199798584
+        },
+        {
+          "id": "V2-S04",
+          "type": "semantic",
+          "query": "I lost my phone somewhere on campus, what happens to things that are found",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "safety-and-security",
+            "[OFF] School of Business and Managemen",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5298863929577841
+        },
+        {
+          "id": "V2-S05",
+          "type": "semantic",
+          "query": "can I leave my degree part way through and come back later",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6309297535714575,
+          "rr@10": 0.5,
+          "top3": [
+            "[OFF] School of Sciences",
+            "entry-exit-guidelines",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.4994495809406301
+        },
+        {
+          "id": "V2-S06",
+          "type": "semantic",
+          "query": "how large is the campus near Mysore Road",
+          "recall@5": 0.5,
+          "ndcg@10": 0.40202955729418194,
+          "rr@10": 0.2,
+          "top3": [
+            "[OFF] How to reach Bangalore Kengeri C",
+            "yeshwanthpur-campus",
+            "reach-yeshwanthpur"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5935609340667725
+        },
+        {
+          "id": "V2-S07",
+          "type": "semantic",
+          "query": "financial help from the state government for students living in Karnataka",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ssp-notice",
+            "scholarship-cell",
+            "pm-vidyalaxmi-poster"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6037678831038695
+        },
+        {
+          "id": "V2-H01",
+          "type": "hybrid",
+          "query": "steps to apply online for admission",
+          "recall@5": 0.6666666666666666,
+          "ndcg@10": 0.8918619332244505,
+          "rr@10": 1.0,
+          "top3": [
+            "admission-procedure",
+            "ssp-notice",
+            "nsp-notice"
+          ],
+          "returned": 48,
+          "top_similarity": 0.690897960013274
+        },
+        {
+          "id": "V2-H02",
+          "type": "hybrid",
+          "query": "selection process 2027 for NRI and international applicants",
+          "recall@5": 0.5,
+          "ndcg@10": 0.9586597063564786,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-pg-selection-2027",
+            "homepage",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6950880056514782
+        },
+        {
+          "id": "V2-H03",
+          "type": "hybrid",
+          "query": "nearest metro to reach the Delhi NCR campus",
+          "recall@5": 0.6666666666666666,
+          "ndcg@10": 0.9067344504824865,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-delhi-ncr",
+            "reach-yeshwanthpur",
+            "[OFF] How to reach Bangalore Bannergha"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7353601017379713
+        },
+        {
+          "id": "V2-H04",
+          "type": "hybrid",
+          "query": "counselling and mental health support for students",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "health-centre",
+            "student-engagement-centres",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.423523485660553
+        },
+        {
+          "id": "V2-F01",
+          "type": "filtered",
+          "query": "how to reach the campus",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "reach-pune-lavasa",
+            "pune-lavasa-campus"
+          ],
+          "returned": 2,
+          "top_similarity": 0.4761375799097082
+        },
+        {
+          "id": "V2-F02",
+          "type": "filtered",
+          "query": "scholarship application",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarship-cell",
+            "ssp-notice",
+            "nsp-notice"
+          ],
+          "returned": 5,
+          "top_similarity": 0.6582186033465143
+        },
+        {
+          "id": "V2-M01",
+          "type": "multi-document",
+          "query": "convocation dates for the Bangalore campuses",
+          "recall@5": 1.0,
+          "ndcg@10": 0.95583058934618,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-2026-27",
+            "[OFF] Class commencement dates of Bang",
+            "student-handbook-2026"
+          ],
+          "returned": 48,
+          "top_similarity": 0.7421394605304097
+        },
+        {
+          "id": "V2-M02",
+          "type": "multi-document",
+          "query": "which government scholarship portals does the university help students with",
+          "recall@5": 0.75,
+          "ndcg@10": 0.8884808439910494,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarship-cell",
+            "student-handbook-2026",
+            "pm-vidyalaxmi-poster"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6545521822838686
+        },
+        {
+          "id": "V2-U01",
+          "type": "unanswerable",
+          "query": "How much is the hostel fee at the Kengeri campus?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "[ILL] Hostel accommodation guidelines",
+            "[OFF] How to reach Bangalore Kengeri C",
+            "[OFF] How to reach Bangalore Bannergha"
+          ],
+          "returned": 48,
+          "top_similarity": 0.5307769179344177
+        },
+        {
+          "id": "V2-U02",
+          "type": "unanswerable",
+          "query": "What is the tuition fee per semester for BTech?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "student-handbook-2026",
+            "[ILL] Tuition fee payment procedure",
+            "academic-calendar-2026-27"
+          ],
+          "returned": 48,
+          "top_similarity": 0.6473879428274677
+        },
+        {
+          "id": "V2-U03",
+          "type": "unanswerable",
+          "query": "What is the library Wi-Fi password?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "student-handbook-2026",
+            "[ILL] Library services and borrowing",
+            "[OFF] School of Sciences"
+          ],
+          "returned": 48,
+          "top_similarity": 0.39204880595207214
+        },
+        {
+          "id": "V2-U04",
+          "type": "unanswerable",
+          "query": "What is the capital of Australia?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "student-handbook-2026",
+            "[OFF] School of Sciences",
+            "homepage"
+          ],
+          "returned": 48,
+          "top_similarity": 0.2789514577701264
+        }
+      ]
+    }
+  },
+  "latency": {
+    "repeats": 5,
+    "warmup_passes": 1,
+    "measured": "in-process retrieval call (query embedding + SQL / BM25 + snippets); excludes HTTP",
+    "modes": {
+      "keyword": {
+        "samples": 125,
+        "distinct_queries": 25,
+        "p50_ms": 2.223700001195539,
+        "p95_ms": 9.025799998198636,
+        "mean_ms": 2.866316799656488,
+        "max_ms": 11.200399996596389
+      },
+      "semantic": {
+        "samples": 125,
+        "distinct_queries": 25,
+        "p50_ms": 15.00040000246372,
+        "p95_ms": 17.88420000229962,
+        "mean_ms": 15.034493600251153,
+        "max_ms": 31.301100003474858
+      },
+      "hybrid": {
+        "samples": 125,
+        "distinct_queries": 25,
+        "p50_ms": 17.707099999825004,
+        "p95_ms": 26.08699999836972,
+        "mean_ms": 18.304791200615,
+        "max_ms": 36.36860000551678
+      }
+    }
+  },
+  "rag_checks": {
+    "retrieval_mode": "hybrid",
+    "top_k": 5,
+    "checks": {
+      "faithful_answer_accepted": [
+        6,
+        6
+      ],
+      "citations_resolve_to_stored_records": [
+        6,
+        6
+      ],
+      "illustrative_source_labelled": [
+        6,
+        6
+      ],
+      "fabricated_citation_id_rejected": [
+        6,
+        6
+      ],
+      "unsupported_marker_rejected": [
+        6,
+        6
+      ],
+      "unsupported_number_rejected": [
+        6,
+        6
+      ],
+      "misquoted_evidence_rejected": [
+        6,
+        6
+      ],
+      "honest_model_insufficient": [
+        4,
+        4
+      ],
+      "fabricated_figure_rejected": [
+        4,
+        4
+      ]
+    },
+    "per_query": [
+      {
+        "id": "V2-K01",
+        "type": "keyword",
+        "checks": {},
+        "evidence_retrieved": false
+      },
+      {
+        "id": "V2-K02",
+        "type": "keyword",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "V2-K04",
+        "type": "keyword",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "V2-K06",
+        "type": "keyword",
+        "checks": {},
+        "evidence_retrieved": false
+      },
+      {
+        "id": "V2-S01",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "V2-S02",
+        "type": "semantic",
+        "checks": {},
+        "evidence_retrieved": false
+      },
+      {
+        "id": "V2-S03",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "V2-S04",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "V2-S06",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "V2-U01",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": false
+      },
+      {
+        "id": "V2-U02",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": false
+      },
+      {
+        "id": "V2-U03",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": false
+      },
+      {
+        "id": "V2-U04",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": false
+      }
+    ]
+  },
+  "groq": {
+    "status": "not run",
+    "reason": "pass --groq with GROQ_API_KEY set"
+  }
+}

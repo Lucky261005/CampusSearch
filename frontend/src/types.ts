@@ -1,8 +1,8 @@
 // Mirrors backend/app/models.py and the /api/search, /api/ask signatures in backend/app/main.py.
 
 export type SearchMode = 'keyword' | 'semantic' | 'hybrid'
-export type Provenance = 'official_web' | 'illustrative'
-export type SourceType = 'json' | 'text' | 'html'
+export type Provenance = 'official_web' | 'supplied_document' | 'illustrative'
+export type SourceType = 'json' | 'text' | 'html' | 'pdf'
 
 export interface Filters {
   campus: string

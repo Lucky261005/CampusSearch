@@ -60,10 +60,11 @@ def test_percentile_nearest_rank():
         percentile([], 50)
 
 
-def test_dataset_is_well_formed():
-    data = json.loads((Path(__file__).parent / "queries.json").read_text(encoding="utf-8"))
+@pytest.mark.parametrize("path", ["queries.json", "v2/queries.json"])
+def test_dataset_is_well_formed(path):
+    data = json.loads((Path(__file__).parent / path).read_text(encoding="utf-8"))
     ids = [q["id"] for q in data["queries"]]
-    assert len(ids) == len(set(ids)) and 20 <= len(ids) <= 25
+    assert len(ids) == len(set(ids)) and 20 <= len(ids) <= 30
     for q in data["queries"]:
         assert set(q["relevant"]) <= set(data["documents"]), q["id"]
         assert all(g in (1, 2, 3) for g in q["relevant"].values()), q["id"]

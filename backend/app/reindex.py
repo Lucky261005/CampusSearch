@@ -8,15 +8,16 @@ import sys
 import psycopg
 
 from app import db
-from app.embeddings import Embedder, chunk_text, embed_input, get_embedder, text_hash, to_pgvector
+from app.embeddings import (Embedder, chunk_document, embed_input, get_embedder, text_hash,
+                            to_pgvector)
 
 
 def index_documents(conn: psycopg.Connection, embedder: Embedder) -> dict[str, int]:
     counts = {"documents": 0, "embedded": 0, "reused": 0, "deleted": 0, "errors": 0}
     for doc in db.all_documents(conn):
         try:
-            chunks = chunk_text(doc.content)
-            inputs = [embed_input(doc.title, c) for c in chunks]
+            chunks = chunk_document(doc.content, doc.page_starts)
+            inputs = [embed_input(doc.title, c) for _, c in chunks]
             existing = {
                 r["position"]: r
                 for r in conn.execute(
@@ -36,11 +37,11 @@ def index_documents(conn: psycopg.Connection, embedder: Embedder) -> dict[str, i
             for i, vec in zip(todo, vectors):
                 conn.execute(
                     "INSERT INTO chunks (id, document_id, position, page, content, content_hash,"
-                    " model, embedding) VALUES (%s, %s, %s, NULL, %s, %s, %s, %s::vector)"
+                    " model, embedding) VALUES (%s, %s, %s, %s, %s, %s, %s, %s::vector)"
                     " ON CONFLICT (document_id, position) DO UPDATE SET content = EXCLUDED.content,"
-                    " content_hash = EXCLUDED.content_hash, model = EXCLUDED.model,"
-                    " embedding = EXCLUDED.embedding",
-                    (f"{doc.id}:{i}", doc.id, i, chunks[i],
+                    " page = EXCLUDED.page, content_hash = EXCLUDED.content_hash,"
+                    " model = EXCLUDED.model, embedding = EXCLUDED.embedding",
+                    (f"{doc.id}:{i}", doc.id, i, chunks[i][0], chunks[i][1],
                      text_hash(inputs[i]), embedder.name, to_pgvector(vec)),
                 )
             deleted = conn.execute(

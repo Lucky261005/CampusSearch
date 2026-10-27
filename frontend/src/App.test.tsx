@@ -68,6 +68,18 @@ describe('search', () => {
     expect(screen.queryByRole('link', { name: /illustrative:/ })).toBeNull()
   })
 
+  test('supplied PDFs are labelled as unverified and not linked', async () => {
+    fetchMock.mockReturnValueOnce(
+      json(searchBody({ results: [hit({ provenance: 'supplied_document', source_type: 'pdf', source_url: 'supplied://scholarship-notices/NSP%20Notice.pdf' })] })),
+    )
+    render(<App />)
+    typeAndSearch('scholarship')
+    expect(await screen.findByText('Supplied document · source not verified')).toBeInTheDocument()
+    expect(screen.getByText('Supplied file — no public source page')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /supplied:/ })).toBeNull()
+    expect(screen.queryByText('Official web page')).toBeNull()
+  })
+
   test('official sources link out safely in a new tab', async () => {
     fetchMock.mockReturnValueOnce(
       json(searchBody({ results: [hit({ provenance: 'official_web', source_type: 'html', source_url: 'https://christuniversity.in/', publication_date: null })] })),

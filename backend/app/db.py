@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS chunks (
     embedding    vector(384) NOT NULL,
     UNIQUE (document_id, position)
 );
+
+-- Phase 6A migration: idempotent, upgrades databases created by earlier versions in place
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS extraction_status TEXT NOT NULL DEFAULT 'ok';
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS extraction_note TEXT;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS page_starts INTEGER[];
 """
 
 COLUMNS = list(Document.model_fields)
@@ -69,6 +74,8 @@ def hash_owner(conn: psycopg.Connection, content_hash: str) -> str | None:
 
 
 def upsert(conn: psycopg.Connection, doc: Document) -> None:
+    """Insert or replace a document. Its old chunks go in the same transaction, so stale
+    text is never searchable; `python -m app.reindex` re-embeds the new content."""
     cols = [c for c in COLUMNS if c != "updated_at"]
     updates = ", ".join(f"{c} = EXCLUDED.{c}" for c in cols if c != "id")
     conn.execute(
@@ -76,7 +83,25 @@ def upsert(conn: psycopg.Connection, doc: Document) -> None:
         f"ON CONFLICT (source_url) DO UPDATE SET {updates}, updated_at = now()",
         [getattr(doc, c) for c in cols],
     )
+    conn.execute("DELETE FROM chunks WHERE document_id = %s", (doc.id,))
     conn.commit()
+
+
+def update_metadata(conn: psycopg.Connection, doc: Document, fields: tuple[str, ...]) -> None:
+    """Update descriptive fields of an unchanged document; content and chunks stay as they are."""
+    conn.execute(
+        f"UPDATE documents SET {', '.join(f'{f} = %s' for f in fields)}, updated_at = now() "
+        "WHERE source_url = %s",
+        [getattr(doc, f) for f in fields] + [doc.source_url],
+    )
+    conn.commit()
+
+
+def delete_by_url(conn: psycopg.Connection, url: str) -> bool:
+    """Delete a document; its chunks cascade."""
+    deleted = conn.execute("DELETE FROM documents WHERE source_url = %s", (url,)).rowcount
+    conn.commit()
+    return bool(deleted)
 
 
 def all_documents(conn: psycopg.Connection) -> list[Document]:
