@@ -1,0 +1,1508 @@
+{
+  "generated_at": "2026-10-27T18:48:04+00:00",
+  "corpus": {
+    "documents": 13,
+    "illustrative_documents": 12,
+    "official_documents": 1,
+    "chunks": 31,
+    "chunk_models": [
+      "sentence-transformers/all-MiniLM-L6-v2"
+    ],
+    "fingerprint": "5a3eef0bde227d7c"
+  },
+  "environment": {
+    "python": "3.13.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+    "cpu_count": 8,
+    "postgres": "PostgreSQL 16.15 (Debian 16.15-1.pgdg12+2) on x86_64-pc-linux-gnu",
+    "pgvector": "0.8.7",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "vector_search": "exact cosine scan (no ANN index)",
+    "torch": "2.7.1+cpu",
+    "torch_threads": 4,
+    "sentence_transformers": "4.1.0",
+    "device": "cpu"
+  },
+  "queries": {
+    "total": 25,
+    "by_type": {
+      "filtered": 1,
+      "hybrid": 6,
+      "keyword": 7,
+      "semantic": 8,
+      "unanswerable": 3
+    }
+  },
+  "semantic": {
+    "available": true,
+    "reason": null,
+    "model_load_s": 9.29
+  },
+  "retrieval": {
+    "keyword": {
+      "judged_queries": 23,
+      "unjudged_queries": [
+        "U01",
+        "U02"
+      ],
+      "recall@5": 0.8478260869565217,
+      "ndcg@10": 0.8069027101054183,
+      "mrr": 0.8333333333333334,
+      "by_type": {
+        "filtered": {
+          "n": 1,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "hybrid": {
+          "n": 6,
+          "recall@5": 1.0,
+          "ndcg@10": 0.9938052011249017,
+          "mrr": 1.0
+        },
+        "keyword": {
+          "n": 7,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "semantic": {
+          "n": 8,
+          "recall@5": 0.5625,
+          "ndcg@10": 0.4494913907094013,
+          "mrr": 0.5208333333333334
+        },
+        "unanswerable": {
+          "n": 1,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        }
+      },
+      "per_query": [
+        {
+          "id": "K01",
+          "type": "keyword",
+          "query": "academic calendar",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-odd",
+            "academic-calendar-even",
+            "scholarships"
+          ],
+          "returned": 4,
+          "top_similarity": null
+        },
+        {
+          "id": "K02",
+          "type": "keyword",
+          "query": "hostel accommodation",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "K03",
+          "type": "keyword",
+          "query": "exam registration hall ticket",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration"
+          ],
+          "returned": 1,
+          "top_similarity": null
+        },
+        {
+          "id": "K04",
+          "type": "keyword",
+          "query": "MBA admissions interview",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "mba-admissions",
+            "ug-admissions",
+            "homepage"
+          ],
+          "returned": 3,
+          "top_similarity": null
+        },
+        {
+          "id": "K05",
+          "type": "keyword",
+          "query": "scholarship financial aid",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarships",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "K06",
+          "type": "keyword",
+          "query": "library borrowing",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "library",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "K07",
+          "type": "keyword",
+          "query": "placement internship",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "placements",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "S01",
+          "type": "semantic",
+          "query": "where can I stay while studying",
+          "recall@5": 0.0,
+          "ndcg@10": 0.0,
+          "rr@10": 0.0,
+          "top3": [
+            "fee-payment",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "S02",
+          "type": "semantic",
+          "query": "how do I sign up for my end of term exams",
+          "recall@5": 1.0,
+          "ndcg@10": 0.6309297535714575,
+          "rr@10": 0.5,
+          "top3": [
+            "academic-calendar-odd",
+            "exam-registration",
+            "academic-calendar-even"
+          ],
+          "returned": 5,
+          "top_similarity": null
+        },
+        {
+          "id": "S03",
+          "type": "semantic",
+          "query": "how many classes must I attend to be allowed to write exams",
+          "recall@5": 0.0,
+          "ndcg@10": 0.3562071871080222,
+          "rr@10": 0.16666666666666666,
+          "top3": [
+            "academic-calendar-odd",
+            "scholarships",
+            "academic-calendar-even"
+          ],
+          "returned": 7,
+          "top_similarity": null
+        },
+        {
+          "id": "S04",
+          "type": "semantic",
+          "query": "money help for students who cannot afford tuition",
+          "recall@5": 1.0,
+          "ndcg@10": 0.5261135977086879,
+          "rr@10": 1.0,
+          "top3": [
+            "fee-payment",
+            "hostel",
+            "placements"
+          ],
+          "returned": 9,
+          "top_similarity": null
+        },
+        {
+          "id": "S05",
+          "type": "semantic",
+          "query": "when do classes begin for the new term",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-even",
+            "academic-calendar-odd",
+            "homepage"
+          ],
+          "returned": 3,
+          "top_similarity": null
+        },
+        {
+          "id": "S06",
+          "type": "semantic",
+          "query": "getting a job after graduation",
+          "recall@5": 0.5,
+          "ndcg@10": 0.08268058728704288,
+          "rr@10": 0.5,
+          "top3": [
+            "exam-registration",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "S07",
+          "type": "semantic",
+          "query": "can I take textbooks home",
+          "recall@5": 0.0,
+          "ndcg@10": 0.0,
+          "rr@10": 0.0,
+          "top3": [
+            "placements",
+            "fee-payment",
+            "homepage"
+          ],
+          "returned": 3,
+          "top_similarity": null
+        },
+        {
+          "id": "S08",
+          "type": "semantic",
+          "query": "what subjects are taught in a data science degree",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "bsc-data-science",
+            "homepage"
+          ],
+          "returned": 2,
+          "top_similarity": null
+        },
+        {
+          "id": "H01",
+          "type": "hybrid",
+          "query": "how to pay semester tuition fees online",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9828422279067397,
+          "rr@10": 1.0,
+          "top3": [
+            "fee-payment",
+            "academic-calendar-odd",
+            "hostel"
+          ],
+          "returned": 8,
+          "top_similarity": null
+        },
+        {
+          "id": "H02",
+          "type": "hybrid",
+          "query": "BBA undergraduate selection process entrance test",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-admissions",
+            "mba-admissions",
+            "homepage"
+          ],
+          "returned": 3,
+          "top_similarity": null
+        },
+        {
+          "id": "H03",
+          "type": "hybrid",
+          "query": "which campuses does CHRIST University have",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "homepage",
+            "ug-admissions",
+            "academic-calendar-even"
+          ],
+          "returned": 5,
+          "top_similarity": null
+        },
+        {
+          "id": "H04",
+          "type": "hybrid",
+          "query": "how do I apply for admission online",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9799889788426704,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-admissions",
+            "homepage",
+            "academic-calendar-odd"
+          ],
+          "returned": 5,
+          "top_similarity": null
+        },
+        {
+          "id": "H05",
+          "type": "hybrid",
+          "query": "rules about hostel visitors and timings",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "placements",
+            "homepage"
+          ],
+          "returned": 3,
+          "top_similarity": null
+        },
+        {
+          "id": "H06",
+          "type": "hybrid",
+          "query": "supplementary exam registration",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration"
+          ],
+          "returned": 1,
+          "top_similarity": null
+        },
+        {
+          "id": "F01",
+          "type": "filtered",
+          "query": "exam registration",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration"
+          ],
+          "returned": 1,
+          "top_similarity": null
+        },
+        {
+          "id": "U01",
+          "type": "unanswerable",
+          "query": "Who won the 2022 FIFA World Cup?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "homepage"
+          ],
+          "returned": 1,
+          "top_similarity": null
+        },
+        {
+          "id": "U02",
+          "type": "unanswerable",
+          "query": "What is the recipe for butter chicken?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [],
+          "returned": 0,
+          "top_similarity": null
+        },
+        {
+          "id": "U03",
+          "type": "unanswerable",
+          "query": "What is the exact hostel fee in rupees?",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "fee-payment",
+            "exam-registration"
+          ],
+          "returned": 5,
+          "top_similarity": null
+        }
+      ]
+    },
+    "semantic": {
+      "judged_queries": 23,
+      "unjudged_queries": [
+        "U01",
+        "U02"
+      ],
+      "recall@5": 0.9782608695652174,
+      "ndcg@10": 0.935816849019516,
+      "mrr": 0.967391304347826,
+      "by_type": {
+        "filtered": {
+          "n": 1,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "hybrid": {
+          "n": 6,
+          "recall@5": 1.0,
+          "ndcg@10": 0.9938052011249017,
+          "mrr": 1.0
+        },
+        "keyword": {
+          "n": 7,
+          "recall@5": 0.9285714285714286,
+          "ndcg@10": 0.9849080605029303,
+          "mrr": 1.0
+        },
+        "semantic": {
+          "n": 8,
+          "recall@5": 1.0,
+          "ndcg@10": 0.8333249871473684,
+          "mrr": 0.90625
+        },
+        "unanswerable": {
+          "n": 1,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        }
+      },
+      "per_query": [
+        {
+          "id": "K01",
+          "type": "keyword",
+          "query": "academic calendar",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-odd",
+            "academic-calendar-even",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.7252098321914673
+        },
+        {
+          "id": "K02",
+          "type": "keyword",
+          "query": "hostel accommodation",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9737576937588317,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "placements",
+            "library"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6354100704193115
+        },
+        {
+          "id": "K03",
+          "type": "keyword",
+          "query": "exam registration hall ticket",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "attendance",
+            "ug-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5739800753640949
+        },
+        {
+          "id": "K04",
+          "type": "keyword",
+          "query": "MBA admissions interview",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "mba-admissions",
+            "ug-admissions",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.7125902943259416
+        },
+        {
+          "id": "K05",
+          "type": "keyword",
+          "query": "scholarship financial aid",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9828422279067397,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarships",
+            "fee-payment",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6410488700241536
+        },
+        {
+          "id": "K06",
+          "type": "keyword",
+          "query": "library borrowing",
+          "recall@5": 0.5,
+          "ndcg@10": 0.9639988080961093,
+          "rr@10": 1.0,
+          "top3": [
+            "library",
+            "fee-payment",
+            "scholarships"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6831496139586432
+        },
+        {
+          "id": "K07",
+          "type": "keyword",
+          "query": "placement internship",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9737576937588317,
+          "rr@10": 1.0,
+          "top3": [
+            "placements",
+            "ug-admissions",
+            "mba-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6432124588959046
+        },
+        {
+          "id": "S01",
+          "type": "semantic",
+          "query": "where can I stay while studying",
+          "recall@5": 1.0,
+          "ndcg@10": 0.43067655807339306,
+          "rr@10": 0.25,
+          "top3": [
+            "placements",
+            "homepage",
+            "academic-calendar-even"
+          ],
+          "returned": 13,
+          "top_similarity": 0.33160124232762134
+        },
+        {
+          "id": "S02",
+          "type": "semantic",
+          "query": "how do I sign up for my end of term exams",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "ug-admissions",
+            "academic-calendar-even"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5362184004523315
+        },
+        {
+          "id": "S03",
+          "type": "semantic",
+          "query": "how many classes must I attend to be allowed to write exams",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "attendance",
+            "exam-registration",
+            "academic-calendar-even"
+          ],
+          "returned": 13,
+          "top_similarity": 0.4333233316751324
+        },
+        {
+          "id": "S04",
+          "type": "semantic",
+          "query": "money help for students who cannot afford tuition",
+          "recall@5": 1.0,
+          "ndcg@10": 0.7098097413968655,
+          "rr@10": 1.0,
+          "top3": [
+            "fee-payment",
+            "scholarships",
+            "attendance"
+          ],
+          "returned": 13,
+          "top_similarity": 0.4635232069208157
+        },
+        {
+          "id": "S05",
+          "type": "semantic",
+          "query": "when do classes begin for the new term",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-even",
+            "academic-calendar-odd",
+            "exam-registration"
+          ],
+          "returned": 13,
+          "top_similarity": 0.35630671046336293
+        },
+        {
+          "id": "S06",
+          "type": "semantic",
+          "query": "getting a job after graduation",
+          "recall@5": 1.0,
+          "ndcg@10": 0.5261135977086879,
+          "rr@10": 1.0,
+          "top3": [
+            "homepage",
+            "mba-admissions",
+            "ug-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.2749601140642103
+        },
+        {
+          "id": "S07",
+          "type": "semantic",
+          "query": "can I take textbooks home",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "library",
+            "attendance",
+            "exam-registration"
+          ],
+          "returned": 13,
+          "top_similarity": 0.34569436090689465
+        },
+        {
+          "id": "S08",
+          "type": "semantic",
+          "query": "what subjects are taught in a data science degree",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "bsc-data-science",
+            "homepage",
+            "ug-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6223639435280547
+        },
+        {
+          "id": "H01",
+          "type": "hybrid",
+          "query": "how to pay semester tuition fees online",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9828422279067397,
+          "rr@10": 1.0,
+          "top3": [
+            "fee-payment",
+            "scholarships",
+            "hostel"
+          ],
+          "returned": 13,
+          "top_similarity": 0.7551334500312858
+        },
+        {
+          "id": "H02",
+          "type": "hybrid",
+          "query": "BBA undergraduate selection process entrance test",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-admissions",
+            "mba-admissions",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6341341544945815
+        },
+        {
+          "id": "H03",
+          "type": "hybrid",
+          "query": "which campuses does CHRIST University have",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "homepage",
+            "placements",
+            "fee-payment"
+          ],
+          "returned": 13,
+          "top_similarity": 0.570168844178516
+        },
+        {
+          "id": "H04",
+          "type": "hybrid",
+          "query": "how do I apply for admission online",
+          "recall@5": 1.0,
+          "ndcg@10": 0.9799889788426704,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-admissions",
+            "mba-admissions",
+            "scholarships"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5845305149397124
+        },
+        {
+          "id": "H05",
+          "type": "hybrid",
+          "query": "rules about hostel visitors and timings",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "attendance",
+            "academic-calendar-odd"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6093351244926453
+        },
+        {
+          "id": "H06",
+          "type": "hybrid",
+          "query": "supplementary exam registration",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "attendance",
+            "academic-calendar-even"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6314411602686497
+        },
+        {
+          "id": "F01",
+          "type": "filtered",
+          "query": "exam registration",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "placements",
+            "hostel"
+          ],
+          "returned": 3,
+          "top_similarity": 0.6355594452215244
+        },
+        {
+          "id": "U01",
+          "type": "unanswerable",
+          "query": "Who won the 2022 FIFA World Cup?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "homepage",
+            "exam-registration",
+            "mba-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.20672150214186336
+        },
+        {
+          "id": "U02",
+          "type": "unanswerable",
+          "query": "What is the recipe for butter chicken?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "homepage",
+            "mba-admissions",
+            "bsc-data-science"
+          ],
+          "returned": 13,
+          "top_similarity": 0.02531838452408408
+        },
+        {
+          "id": "U03",
+          "type": "unanswerable",
+          "query": "What is the exact hostel fee in rupees?",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "fee-payment",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5780175076733545
+        }
+      ]
+    },
+    "hybrid": {
+      "judged_queries": 23,
+      "unjudged_queries": [
+        "U01",
+        "U02"
+      ],
+      "recall@5": 1.0,
+      "ndcg@10": 0.8918805359578745,
+      "mrr": 0.9036231884057971,
+      "by_type": {
+        "filtered": {
+          "n": 1,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "hybrid": {
+          "n": 6,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "keyword": {
+          "n": 7,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        },
+        "semantic": {
+          "n": 8,
+          "recall@5": 1.0,
+          "ndcg@10": 0.6891565408788892,
+          "mrr": 0.7229166666666667
+        },
+        "unanswerable": {
+          "n": 1,
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "mrr": 1.0
+        }
+      },
+      "per_query": [
+        {
+          "id": "K01",
+          "type": "keyword",
+          "query": "academic calendar",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-odd",
+            "academic-calendar-even",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.7252098321914673
+        },
+        {
+          "id": "K02",
+          "type": "keyword",
+          "query": "hostel accommodation",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "homepage",
+            "placements"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6354100704193115
+        },
+        {
+          "id": "K03",
+          "type": "keyword",
+          "query": "exam registration hall ticket",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "attendance",
+            "ug-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5739800753640949
+        },
+        {
+          "id": "K04",
+          "type": "keyword",
+          "query": "MBA admissions interview",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "mba-admissions",
+            "ug-admissions",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.7125902943259416
+        },
+        {
+          "id": "K05",
+          "type": "keyword",
+          "query": "scholarship financial aid",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "scholarships",
+            "homepage",
+            "fee-payment"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6410488700241536
+        },
+        {
+          "id": "K06",
+          "type": "keyword",
+          "query": "library borrowing",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "library",
+            "homepage",
+            "fee-payment"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6831496139586432
+        },
+        {
+          "id": "K07",
+          "type": "keyword",
+          "query": "placement internship",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "placements",
+            "homepage",
+            "ug-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6432124588959046
+        },
+        {
+          "id": "S01",
+          "type": "semantic",
+          "query": "where can I stay while studying",
+          "recall@5": 1.0,
+          "ndcg@10": 0.38685280723454163,
+          "rr@10": 0.2,
+          "top3": [
+            "homepage",
+            "fee-payment",
+            "placements"
+          ],
+          "returned": 13,
+          "top_similarity": 0.33160124232762134
+        },
+        {
+          "id": "S02",
+          "type": "semantic",
+          "query": "how do I sign up for my end of term exams",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "academic-calendar-odd",
+            "academic-calendar-even"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5362184004523315
+        },
+        {
+          "id": "S03",
+          "type": "semantic",
+          "query": "how many classes must I attend to be allowed to write exams",
+          "recall@5": 1.0,
+          "ndcg@10": 0.5,
+          "rr@10": 0.3333333333333333,
+          "top3": [
+            "academic-calendar-odd",
+            "academic-calendar-even",
+            "attendance"
+          ],
+          "returned": 13,
+          "top_similarity": 0.4333233316751324
+        },
+        {
+          "id": "S04",
+          "type": "semantic",
+          "query": "money help for students who cannot afford tuition",
+          "recall@5": 1.0,
+          "ndcg@10": 0.7098097413968655,
+          "rr@10": 1.0,
+          "top3": [
+            "fee-payment",
+            "scholarships",
+            "hostel"
+          ],
+          "returned": 13,
+          "top_similarity": 0.4635232069208157
+        },
+        {
+          "id": "S05",
+          "type": "semantic",
+          "query": "when do classes begin for the new term",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "academic-calendar-even",
+            "academic-calendar-odd",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.35630671046336293
+        },
+        {
+          "id": "S06",
+          "type": "semantic",
+          "query": "getting a job after graduation",
+          "recall@5": 1.0,
+          "ndcg@10": 0.48591322032631384,
+          "rr@10": 1.0,
+          "top3": [
+            "homepage",
+            "exam-registration",
+            "mba-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.2749601140642103
+        },
+        {
+          "id": "S07",
+          "type": "semantic",
+          "query": "can I take textbooks home",
+          "recall@5": 1.0,
+          "ndcg@10": 0.43067655807339306,
+          "rr@10": 0.25,
+          "top3": [
+            "fee-payment",
+            "homepage",
+            "placements"
+          ],
+          "returned": 13,
+          "top_similarity": 0.34569436090689465
+        },
+        {
+          "id": "S08",
+          "type": "semantic",
+          "query": "what subjects are taught in a data science degree",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "bsc-data-science",
+            "homepage",
+            "ug-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6223639435280547
+        },
+        {
+          "id": "H01",
+          "type": "hybrid",
+          "query": "how to pay semester tuition fees online",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "fee-payment",
+            "hostel",
+            "academic-calendar-odd"
+          ],
+          "returned": 13,
+          "top_similarity": 0.7551334500312858
+        },
+        {
+          "id": "H02",
+          "type": "hybrid",
+          "query": "BBA undergraduate selection process entrance test",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-admissions",
+            "mba-admissions",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6341341544945815
+        },
+        {
+          "id": "H03",
+          "type": "hybrid",
+          "query": "which campuses does CHRIST University have",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "homepage",
+            "academic-calendar-even",
+            "fee-payment"
+          ],
+          "returned": 13,
+          "top_similarity": 0.570168844178516
+        },
+        {
+          "id": "H04",
+          "type": "hybrid",
+          "query": "how do I apply for admission online",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "ug-admissions",
+            "homepage",
+            "mba-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5845305149397124
+        },
+        {
+          "id": "H05",
+          "type": "hybrid",
+          "query": "rules about hostel visitors and timings",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "homepage",
+            "placements"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6093351244926453
+        },
+        {
+          "id": "H06",
+          "type": "hybrid",
+          "query": "supplementary exam registration",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "attendance",
+            "academic-calendar-even"
+          ],
+          "returned": 13,
+          "top_similarity": 0.6314411602686497
+        },
+        {
+          "id": "F01",
+          "type": "filtered",
+          "query": "exam registration",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "exam-registration",
+            "placements",
+            "hostel"
+          ],
+          "returned": 3,
+          "top_similarity": 0.6355594452215244
+        },
+        {
+          "id": "U01",
+          "type": "unanswerable",
+          "query": "Who won the 2022 FIFA World Cup?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "homepage",
+            "exam-registration",
+            "mba-admissions"
+          ],
+          "returned": 13,
+          "top_similarity": 0.20672150214186336
+        },
+        {
+          "id": "U02",
+          "type": "unanswerable",
+          "query": "What is the recipe for butter chicken?",
+          "recall@5": null,
+          "ndcg@10": null,
+          "rr@10": null,
+          "top3": [
+            "homepage",
+            "mba-admissions",
+            "bsc-data-science"
+          ],
+          "returned": 13,
+          "top_similarity": 0.02531838452408408
+        },
+        {
+          "id": "U03",
+          "type": "unanswerable",
+          "query": "What is the exact hostel fee in rupees?",
+          "recall@5": 1.0,
+          "ndcg@10": 1.0,
+          "rr@10": 1.0,
+          "top3": [
+            "hostel",
+            "fee-payment",
+            "homepage"
+          ],
+          "returned": 13,
+          "top_similarity": 0.5780175076733545
+        }
+      ]
+    }
+  },
+  "latency": {
+    "repeats": 5,
+    "warmup_passes": 1,
+    "measured": "in-process retrieval call (query embedding + SQL / BM25 + snippets); excludes HTTP",
+    "modes": {
+      "keyword": {
+        "samples": 125,
+        "distinct_queries": 25,
+        "p50_ms": 0.16569999570492655,
+        "p95_ms": 0.6192000000737607,
+        "mean_ms": 0.23658799956319854,
+        "max_ms": 0.7249999980558641
+      },
+      "semantic": {
+        "samples": 125,
+        "distinct_queries": 25,
+        "p50_ms": 9.641199998441152,
+        "p95_ms": 11.757199994463008,
+        "mean_ms": 9.909145600220654,
+        "max_ms": 13.071900000795722
+      },
+      "hybrid": {
+        "samples": 125,
+        "distinct_queries": 25,
+        "p50_ms": 10.2370999957202,
+        "p95_ms": 12.433800002327189,
+        "mean_ms": 10.390360800025519,
+        "max_ms": 13.80829999834532
+      }
+    }
+  },
+  "rag_checks": {
+    "retrieval_mode": "hybrid",
+    "top_k": 5,
+    "checks": {
+      "faithful_answer_accepted": [
+        8,
+        8
+      ],
+      "citations_resolve_to_stored_records": [
+        8,
+        8
+      ],
+      "illustrative_source_labelled": [
+        8,
+        8
+      ],
+      "fabricated_citation_id_rejected": [
+        8,
+        8
+      ],
+      "unsupported_marker_rejected": [
+        8,
+        8
+      ],
+      "unsupported_number_rejected": [
+        8,
+        8
+      ],
+      "misquoted_evidence_rejected": [
+        8,
+        8
+      ],
+      "honest_model_insufficient": [
+        3,
+        3
+      ],
+      "fabricated_figure_rejected": [
+        3,
+        3
+      ]
+    },
+    "per_query": [
+      {
+        "id": "K02",
+        "type": "keyword",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "K03",
+        "type": "keyword",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "K04",
+        "type": "keyword",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "S02",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "S03",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "S08",
+        "type": "semantic",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "H01",
+        "type": "hybrid",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "H05",
+        "type": "hybrid",
+        "checks": {
+          "faithful_answer_accepted": true,
+          "citations_resolve_to_stored_records": true,
+          "illustrative_source_labelled": true,
+          "fabricated_citation_id_rejected": true,
+          "unsupported_marker_rejected": true,
+          "unsupported_number_rejected": true,
+          "misquoted_evidence_rejected": true
+        },
+        "evidence_retrieved": true,
+        "problems": []
+      },
+      {
+        "id": "U01",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": true
+      },
+      {
+        "id": "U02",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": true
+      },
+      {
+        "id": "U03",
+        "type": "unanswerable",
+        "checks": {
+          "honest_model_insufficient": true,
+          "fabricated_figure_rejected": true
+        },
+        "gated_before_llm": false
+      }
+    ]
+  },
+  "groq": {
+    "status": "not run",
+    "reason": "pass --groq with GROQ_API_KEY set"
+  }
+}
