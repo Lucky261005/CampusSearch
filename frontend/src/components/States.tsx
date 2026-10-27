@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 export function LoadingState({ label }: { label: string }) {
   return (
-    <div role="status" aria-live="polite" className="space-y-3">
+    <div role="status" aria-live="polite" className="enter space-y-3">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((i) => (
         <div key={i} aria-hidden className="animate-pulse rounded-xl border border-line bg-white p-5">
@@ -17,7 +17,7 @@ export function LoadingState({ label }: { label: string }) {
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-xl border border-dashed border-line bg-white px-6 py-10 text-center">
+    <div className="enter rounded-xl border border-dashed border-line bg-white px-6 py-10 text-center">
       <p className="font-serif text-lg text-ink">{title}</p>
       {children && <div className="mx-auto mt-2 max-w-md text-sm text-muted">{children}</div>}
     </div>
@@ -26,7 +26,7 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div role="alert" className="enter flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="text-sm font-semibold text-red-900">Something went wrong</p>
         <p className="mt-0.5 text-sm text-red-800">{message}</p>

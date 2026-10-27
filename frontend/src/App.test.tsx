@@ -48,6 +48,16 @@ function typeAndSearch(text: string) {
   fireEvent.click(screen.getByRole('button', { name: 'Search' }))
 }
 
+test('view tabs are linked to the panel they control', () => {
+  render(<App />)
+  const panel = screen.getByRole('tabpanel')
+  expect(panel).toHaveAccessibleName('Search')
+  for (const t of screen.getAllByRole('tab')) expect(t).toHaveAttribute('aria-controls', panel.id)
+  fireEvent.click(screen.getByRole('tab', { name: 'Ask AI' }))
+  expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Ask AI')
+  expect(screen.getByRole('main')).toBeInTheDocument() // landmark kept inside the panel
+})
+
 describe('search', () => {
   test('submits the query and renders a result card with metadata and provenance', async () => {
     fetchMock.mockReturnValueOnce(json(searchBody()))

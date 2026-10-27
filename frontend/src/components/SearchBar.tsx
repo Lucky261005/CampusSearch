@@ -34,7 +34,7 @@ export function SearchBar(p: Props) {
         <button
           type="submit"
           disabled={!p.value.trim() || p.busy}
-          className="h-12 rounded-xl bg-accent px-6 text-sm font-semibold text-white shadow-sm hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
+          className="press h-12 rounded-xl bg-accent px-6 text-sm font-semibold text-white shadow-sm hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
         >
           {p.submitLabel}
         </button>

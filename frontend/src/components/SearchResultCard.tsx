@@ -15,7 +15,7 @@ export function Meta({ children }: { children: React.ReactNode }) {
 
 export function SearchResultCard({ hit, mode, rank }: { hit: SearchHit; mode: SearchMode; rank: number }) {
   return (
-    <article className="group rounded-xl border border-line bg-white p-5 transition-colors hover:border-slate-300">
+    <article className="lift group rounded-2xl border border-line bg-white p-5 hover:border-accent/40">
       <div className="flex flex-wrap items-center gap-2">
         <ProvenanceLabel provenance={hit.provenance} />
         <span className="text-xs uppercase tracking-wide text-muted">{hit.source_type}</span>

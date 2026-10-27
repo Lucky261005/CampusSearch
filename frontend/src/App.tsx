@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { ask, filterEntries, PAGE_SIZE, search } from './api'
 import { AnswerPanel } from './components/AnswerPanel'
 import { Header, type Tab } from './components/Header'
@@ -111,14 +111,19 @@ export default function App() {
     <div className="min-h-screen">
       <Header tab={tab} onTab={setTab} />
 
+      <div role="tabpanel" id="view-panel" aria-labelledby={`tab-${tab}`}>
       <section className="border-b border-line bg-white">
         <div className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pt-14">
-          <h1 className="max-w-2xl font-serif text-3xl leading-tight tracking-tight text-ink sm:text-4xl">
+          <p className="mb-2 text-sm font-semibold text-accent">
+            CHRIST (Deemed to be University) · local search
+          </p>
+          {/* keyed: the copy re-enters on tab switch instead of swapping in place */}
+          <h1 key={`h-${tab}`} className="enter max-w-2xl font-serif text-4xl font-semibold text-ink sm:text-5xl">
             {tab === 'search'
               ? 'Search university information, by keyword or by meaning.'
               : 'Ask a question. Get an answer grounded in cited sources.'}
           </h1>
-          <p className="mt-3 max-w-2xl text-base text-muted">
+          <p key={`p-${tab}`} className="enter mt-3 max-w-2xl text-base text-muted" style={{ '--i': 1 } as CSSProperties}>
             {tab === 'search'
               ? 'CampusSearch indexes CHRIST (Deemed to be University) information with a custom BM25 engine, vector search and hybrid rank fusion.'
               : 'Answers are generated only from retrieved passages. When the sources do not establish an answer, CampusSearch says so instead of guessing.'}
@@ -200,6 +205,7 @@ export default function App() {
           )}
         </div>
       </main>
+      </div>
     </div>
   )
 }
@@ -250,7 +256,11 @@ function SearchResults({
         <>
           <ol className="space-y-3">
             {data.results.map((hit, i) => (
-              <li key={`${hit.id}:${hit.chunk_id ?? ''}`}>
+              <li
+                key={`${hit.id}:${hit.chunk_id ?? ''}`}
+                className="enter"
+                style={{ '--i': i } as CSSProperties}
+              >
                 <SearchResultCard hit={hit} mode={data.mode} rank={data.offset + i + 1} />
               </li>
             ))}

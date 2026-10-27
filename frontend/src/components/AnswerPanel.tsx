@@ -80,7 +80,7 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
 
   return (
     <div className="space-y-6">
-      <section aria-live="polite" className={`rounded-xl border p-5 ${s.tone}`}>
+      <section aria-live="polite" className={`enter rounded-2xl border p-5 ${s.tone}`}>
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">{s.title}</h2>
         {data.status === 'answered' && data.answer ? (
           <div className="mt-2">

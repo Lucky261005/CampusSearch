@@ -62,7 +62,13 @@ export function SearchFilters({
           </button>
         </div>
       </div>
-      <div id="filter-fields" className={`mt-3 ${open ? 'block' : 'hidden'} lg:block`}>
+      {/* invisible when collapsed so hidden fields are not focusable; always open from lg up */}
+      <div
+        id="filter-fields"
+        className={`disclose lg:visible lg:grid-rows-[1fr] ${open ? 'grid-rows-[1fr]' : 'invisible grid-rows-[0fr]'}`}
+      >
+      <div>
+      <div className="pt-3">{/* padding on the grandchild so the collapsed row can reach 0 */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         {text('campus', 'Campus', 'e.g. Kengeri')}
         {text('category', 'Category', 'e.g. examinations')}
@@ -100,6 +106,8 @@ export function SearchFilters({
           <span className="block text-muted">Synthetic demo data, not official information.</span>
         </span>
       </label>
+      </div>
+      </div>
       </div>
       {badRange && <p role="alert" className="mt-2 text-xs font-medium text-red-700">“From” must be on or before “to”.</p>}
       {pending && !badRange && (
