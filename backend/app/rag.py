@@ -4,18 +4,39 @@ import json
 import logging
 import os
 import re
+import time
 from collections.abc import Callable
 
 import httpx
 
 from app.models import AskResponse, Citation, SourcePassage
 from app.retrieval import Passage
+from app.usage import LocalLimitReached, UsageLimiter, _env_int
 
 log = logging.getLogger("campussearch")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# llama-3.3-70b-versatile (the earlier default) was shut down for developer-tier use on
+# 2026-08-16 per Groq's deprecations page; openai/gpt-oss-120b is its listed replacement.
+GROQ_MODEL = os.getenv("GROQ_MODEL") or "openai/gpt-oss-120b"  # empty value -> default
 GROQ_TIMEOUT_S = 20
+# free-use policy: at most 600 generated tokens per answer (non-secret, configurable)
+GROQ_MAX_TOKENS = _env_int("CAMPUSSEARCH_AI_MAX_TOKENS", 600) or 600
+GROQ_ATTEMPTS = 2       # one retry, only for timeouts, connection errors and 5xx
+# After HTTP 429 no request is sent until the provider's retry-after has passed (bounded), so a
+# busy user cannot keep hitting a free-tier limit.
+COOLDOWN_DEFAULT_S, COOLDOWN_MIN_S, COOLDOWN_MAX_S = 60, 10, 600
+_cooldown_until = 0.0
+
+_limiter: UsageLimiter | None = None
+
+
+def usage_limiter() -> UsageLimiter:
+    """The installation-wide quota (app/usage.py), created on first AI request."""
+    global _limiter
+    if _limiter is None:
+        _limiter = UsageLimiter()
+    return _limiter
 MAX_CONTEXT_CHARS = 6000
 MAX_PASSAGE_CHARS = 1500
 # Below this best-chunk cosine similarity the corpus has nothing on the topic; skip the LLM.
@@ -41,32 +62,107 @@ LLM = Callable[[list[dict]], str]
 
 
 class LLMUnavailable(Exception):
-    """Message is safe to show users; never contains provider output or credentials."""
+    """Message is safe to show users; never contains provider output or credentials.
+    `attempted` is False when no request was sent at all (e.g. no API key configured)."""
+
+    def __init__(self, message: str, attempted: bool = True):
+        super().__init__(message)
+        self.attempted = attempted
+
+
+def _error_code(res: httpx.Response) -> str:
+    """Groq's short machine-readable error code; the human message is never used."""
+    try:
+        return str(res.json().get("error", {}).get("code") or "")
+    except Exception:
+        return ""
+
+
+def _start_cooldown(res: httpx.Response) -> int:
+    global _cooldown_until
+    try:
+        seconds = int(float(res.headers.get("retry-after", COOLDOWN_DEFAULT_S)))
+    except ValueError:
+        seconds = COOLDOWN_DEFAULT_S
+    seconds = max(COOLDOWN_MIN_S, min(COOLDOWN_MAX_S, seconds))
+    _cooldown_until = time.monotonic() + seconds
+    return seconds
 
 
 def groq_chat(messages: list[dict]) -> str:
     key = os.environ.get("GROQ_API_KEY")
     if not key:
-        raise LLMUnavailable("answer generation is not configured (GROQ_API_KEY unset)")
+        raise LLMUnavailable("answer generation is not configured (GROQ_API_KEY unset)", attempted=False)
+    wait = _cooldown_until - time.monotonic()
+    if wait > 0:
+        raise LLMUnavailable(f"the answer service's usage limit was reached; AI answers resume in about "
+                             f"{int(wait) + 1} s. Showing retrieved passages", attempted=False)
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": messages,
+        "temperature": 0,
+        "max_tokens": GROQ_MAX_TOKENS,
+        "response_format": {"type": "json_object"},
+    }
+    if GROQ_MODEL.startswith("openai/gpt-oss"):
+        payload["reasoning_effort"] = "low"  # short grounded answers need little reasoning
+
+    res, sent = None, 0
+    for attempt in range(1, GROQ_ATTEMPTS + 1):
+        try:
+            rid = usage_limiter().reserve()  # each attempt is a request and needs its own slot
+        except LocalLimitReached as e:
+            if sent == 0:  # nothing was sent: this is a local limit, not a provider failure
+                raise LLMUnavailable(f"{e}. Showing retrieved passages", attempted=False) from None
+            break  # a retry would exceed the local quota: report the earlier failure instead
+        try:
+            res = httpx.post(GROQ_URL, headers={"Authorization": f"Bearer {key}"}, json=payload,
+                             timeout=httpx.Timeout(GROQ_TIMEOUT_S, connect=5))
+        except httpx.ConnectError as e:  # never reached the provider: not counted
+            usage_limiter().release(rid)
+            log.warning("groq request attempt %d failed: %s", attempt, type(e).__name__)
+            res = None
+            continue
+        except httpx.HTTPError as e:  # timeouts etc.: the provider may have received it, so it counts
+            usage_limiter().settle(rid, type(e).__name__)
+            sent += 1
+            # exception type only; messages can echo request details
+            log.warning("groq request attempt %d failed: %s", attempt, type(e).__name__)
+            res = None
+            continue
+        usage_limiter().settle(rid, f"http_{res.status_code}")
+        sent += 1
+        if res.status_code < 500:
+            break
+        log.warning("groq request attempt %d failed: HTTP %d", attempt, res.status_code)
+
+    if res is None:
+        raise LLMUnavailable("could not reach the answer service (timeout or network error); "
+                             "showing retrieved passages")
+    if res.status_code >= 400:
+        code = _error_code(res)
+        log.warning("groq request rejected: HTTP %d %s", res.status_code, code)
+        if res.status_code in (401, 403):
+            raise LLMUnavailable("the answer service rejected the API key; check GROQ_API_KEY")
+        if res.status_code == 429:
+            seconds = _start_cooldown(res)
+            raise LLMUnavailable("the answer service rate limit or quota was reached; AI answers are paused "
+                                 f"for about {seconds} s. Showing retrieved passages")
+        if code == "blocked_api_access":
+            raise LLMUnavailable("the answer service account has reached its usage or spending limit; "
+                                 "AI answers are unavailable. Showing retrieved passages")
+        if res.status_code == 404 or "model" in code:
+            raise LLMUnavailable(f"the configured model '{GROQ_MODEL}' is not available; "
+                                 "set GROQ_MODEL to a supported Groq model")
+        raise LLMUnavailable(f"answer generation failed (HTTP {res.status_code}); "
+                             "showing retrieved passages")
     try:
-        res = httpx.post(
-            GROQ_URL,
-            headers={"Authorization": f"Bearer {key}"},
-            json={
-                "model": GROQ_MODEL,
-                "messages": messages,
-                "temperature": 0,
-                "max_tokens": 500,
-                "response_format": {"type": "json_object"},
-            },
-            timeout=GROQ_TIMEOUT_S,
-        )
-        res.raise_for_status()
-        return res.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        # exception type only; messages and bodies can echo request details
-        log.warning("groq request failed: %s", type(e).__name__)
-        raise LLMUnavailable("answer generation failed; showing retrieved passages") from None
+        content = res.json()["choices"][0]["message"]["content"]
+    except (ValueError, KeyError, IndexError, TypeError):
+        raise LLMUnavailable("the answer service returned an unexpected response") from None
+    if not isinstance(content, str) or not content.strip():
+        raise LLMUnavailable("the answer service returned an empty answer")
+    return content
 
 
 def label(p: Passage) -> str:
@@ -125,6 +221,7 @@ def answer(question: str, passages: list[Passage], llm: LLM, retrieval: dict) ->
         return AskResponse(question=question, status=status, answer=answer, message=message,
                            citations=citations, sources=sources, retrieval=retrieval)
 
+    retrieval.setdefault("llm_called", False)  # stays False for gated and empty retrievals
     sims = [p.similarity for p in passages if p.similarity is not None]
     if not passages or (sims and max(sims) < MIN_SIMILARITY):
         return respond("insufficient_evidence",
@@ -135,9 +232,11 @@ def answer(question: str, passages: list[Passage], llm: LLM, retrieval: dict) ->
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"Sources:\n\n{context}\n\nQuestion: {question}"},
     ]
+    retrieval["llm_called"] = True
     try:
         raw = llm(messages)
     except LLMUnavailable as e:
+        retrieval["llm_called"] = e.attempted
         return respond("fallback", str(e), used=used)
 
     try:
@@ -189,4 +288,6 @@ def answer(question: str, passages: list[Passage], llm: LLM, retrieval: dict) ->
     message = "Answer generated from the cited sources; verify important details with the university."
     if any(used[n - 1].doc.provenance == "illustrative" for n in cites):
         message += " Cites illustrative sample records, which are not official university information."
+    if any(used[n - 1].doc.provenance == "supplied_document" for n in cites):
+        message += " Cites a supplied document whose official source has not been verified."
     return respond("answered", message, text, cites, used)

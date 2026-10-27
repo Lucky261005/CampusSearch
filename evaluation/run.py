@@ -8,7 +8,9 @@ Run from the repository root (Postgres up, corpus ingested and reindexed):
 
 Options:
     --repeats N         timed passes per mode after one warm-up pass (default 5)
-    --groq              also run real Groq answers if GROQ_API_KEY is set (off by default)
+    --groq              also run real Groq answers if GROQ_API_KEY is set (off by default). Makes one
+                        provider request per question (up to 26); stops at the first 429 or account limit.
+                        Use only deliberately, within a free allowance.
     --price-in/--price-out USD per million tokens, from Groq's published pricing, to estimate cost
 
 Writes evaluation/results/results.json and evaluation/RESULTS.md.
@@ -316,17 +318,36 @@ def evaluate_groq(conn, embedder, index, data, price_in, price_out) -> dict:
         return {"status": "unavailable", "reason": "GROQ_API_KEY not set"}
     usage_log = []
 
-    def llm(messages):  # same request as rag.groq_chat, but keeps token usage
-        res = httpx.post(rag.GROQ_URL, timeout=rag.GROQ_TIMEOUT_S,
-                         headers={"Authorization": f"Bearer {os.environ['GROQ_API_KEY']}"},
-                         json={"model": rag.GROQ_MODEL, "messages": messages, "temperature": 0,
-                               "max_tokens": 500, "response_format": {"type": "json_object"}})
+    class LimitReached(Exception):
+        pass
+
+    def llm(messages):  # same request settings as rag.groq_chat, but keeps token usage
+        payload = {"model": rag.GROQ_MODEL, "messages": messages, "temperature": 0,
+                   "max_tokens": rag.GROQ_MAX_TOKENS, "response_format": {"type": "json_object"}}
+        if rag.GROQ_MODEL.startswith("openai/gpt-oss"):
+            payload["reasoning_effort"] = "low"
+        try:  # same local quota as the app (app/usage.py)
+            rid = rag.usage_limiter().reserve()
+        except rag.LocalLimitReached:
+            raise LimitReached from None
+        try:
+            res = httpx.post(rag.GROQ_URL, timeout=rag.GROQ_TIMEOUT_S, json=payload,
+                             headers={"Authorization": f"Bearer {os.environ['GROQ_API_KEY']}"})
+        except httpx.ConnectError:
+            rag.usage_limiter().release(rid)
+            raise
+        except httpx.HTTPError as e:
+            rag.usage_limiter().settle(rid, type(e).__name__)
+            raise
+        rag.usage_limiter().settle(rid, f"http_{res.status_code}")
+        if res.status_code == 429 or rag._error_code(res) == "blocked_api_access":
+            raise LimitReached  # free-allowance protection: stop the whole run
         res.raise_for_status()
         body = res.json()
         usage_log.append(body.get("usage") or {})
         return body["choices"][0]["message"]["content"]
 
-    rows = []
+    rows, stopped = [], None
     for q in data["queries"]:
         passages, _ = answer_passages(conn, embedder, index, load_chunk_index(conn), q["query"],
                                       Filters(**q.get("filters", {})), TOP_K_ASK)
@@ -335,6 +356,9 @@ def evaluate_groq(conn, embedder, index, data, price_in, price_out) -> dict:
         try:
             res = rag.answer(q["query"], passages, llm, {"mode": "hybrid"})
             status, problems = res.status, citation_problems(res, conn)
+        except LimitReached:
+            stopped = f"provider or local limit reached at {q['id']}; remaining questions were not sent"
+            break
         except Exception as e:  # provider errors are recorded, never raised with details
             status, problems = f"error: {type(e).__name__}", []
         rows.append({"id": q["id"], "status": status, "latency_ms": (time.perf_counter() - t) * 1000,
@@ -346,7 +370,7 @@ def evaluate_groq(conn, embedder, index, data, price_in, price_out) -> dict:
     cost = None
     if price_in is not None and price_out is not None and usage_log:
         cost = (tokens_in * price_in + tokens_out * price_out) / 1e6 / len(usage_log)
-    return {"status": "ran", "model": rag.GROQ_MODEL, "llm_calls": len(usage_log),
+    return {"status": "ran", "stopped": stopped, "model": rag.GROQ_MODEL, "llm_calls": len(usage_log),
             "prompt_tokens": tokens_in, "completion_tokens": tokens_out,
             "p50_ms": percentile(called, 50) if called else None,
             "p95_ms": percentile(called, 95) if called else None,

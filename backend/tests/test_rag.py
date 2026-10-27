@@ -61,6 +61,16 @@ def test_verified_answer_maps_citations_to_stored_passages():
     assert [s.source_url for s in res.sources] == ["u:hostel", "u:fee"]
 
 
+def test_answer_citing_a_supplied_document_says_it_is_unverified():
+    supplied = passage("supplied://n/NSP.pdf", "Register through One-Time Registration (OTR) on the NSP Portal.",
+                       provenance="supplied_document")
+    res = answer("How do I register on NSP?", [supplied, PS[1]],
+                 reply("Use One-Time Registration [1].",
+                       [{"source": 1, "quote": "Register through One-Time Registration (OTR)"}]), INFO)
+    assert res.status == "answered" and "supplied document" in res.message
+    assert "not been verified" in res.message and "illustrative" not in res.message.lower()
+
+
 def test_illustrative_and_official_sources_are_labelled():
     res = answer("q", PS, reply("Fees are paid online [2]. Rooms on application [1].",
                                 [{"source": 2, "quote": "Fees are paid online"}, HOSTEL_QUOTE]),
@@ -203,7 +213,8 @@ def test_groq_request_shape(monkeypatch):
 
     monkeypatch.setattr(rag.httpx, "post", fake_post)
     assert groq_chat([{"role": "user", "content": "hi"}]) == "{}"
-    assert sent["headers"]["Authorization"] == "Bearer k" and sent["timeout"] == 20
+    assert sent["headers"]["Authorization"] == "Bearer k"
+    assert sent["timeout"].read == 20 and sent["timeout"].connect == 5
     assert sent["json"]["temperature"] == 0
 
 
@@ -263,7 +274,8 @@ def test_ask_degrades_to_keyword_when_model_missing(client):
     app.state.embedder = None
     app.state.llm = llm_returning(answer="", citations=[], insufficient_evidence=True)
     body = client.post("/api/ask", json={"question": "hostel"}).json()
-    assert body["retrieval"] == {"mode": "keyword", "semantic_available": False, "retrieved": 1}
+    assert body["retrieval"] == {"mode": "keyword", "semantic_available": False, "retrieved": 1,
+                                 "llm_called": True}
 
 
 @pytest.mark.parametrize("payload", [

@@ -27,6 +27,33 @@ def _test_db() -> str:
     return TEST_DATABASE_URL
 
 
+class UnlimitedUsage:
+    """Stand-in quota for provider tests; the real quota is tested in test_usage.py."""
+
+    def __init__(self):
+        self.reserved, self.released, self.settled = 0, [], []
+
+    def reserve(self):
+        self.reserved += 1
+        return self.reserved
+
+    def release(self, rid):
+        self.released.append(rid)
+
+    def settle(self, rid, outcome):
+        self.settled.append((rid, outcome))
+
+
+@pytest.fixture(autouse=True)
+def _reset_provider_cooldown(monkeypatch):
+    """A 429 in one test must not pause the provider for the next; no test touches the real quota
+    table unless it opts in."""
+    from app import rag
+
+    monkeypatch.setattr(rag, "_cooldown_until", 0.0)
+    monkeypatch.setattr(rag, "_limiter", UnlimitedUsage())
+
+
 class FixtureClient:
     """TestClient whose requests opt in to illustrative records, which most fixtures are.
     Normal API callers never see them unless they pass include_illustrative explicitly."""

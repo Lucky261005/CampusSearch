@@ -15,3 +15,6 @@ dist/
 Thumbs.db
 .vscode/
 .idea/
+
+# Phase 7: real-provider answer logs for manual review (may contain generated text)
+evaluation/private/

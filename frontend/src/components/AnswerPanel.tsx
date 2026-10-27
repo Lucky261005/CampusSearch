@@ -75,6 +75,7 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
   const sources = data.sources.map((s) => ({ ...s, quote: quoteBy.get(s.n) ?? null }))
   const cited = new Set(data.citations.map((c) => c.n))
   const citesIllustrative = data.citations.some((c) => c.provenance === 'illustrative')
+  const citesSupplied = data.citations.some((c) => c.provenance === 'supplied_document')
   const s = STATUS[data.status]
 
   return (
@@ -88,6 +89,11 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
               <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
                 This answer cites illustrative sample records. It is not official CHRIST University
                 information.
+              </p>
+            )}
+            {citesSupplied && (
+              <p className="mt-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
+                This answer cites a supplied document whose official source has not been verified.
               </p>
             )}
             <p className="mt-3 text-xs text-muted">

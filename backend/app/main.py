@@ -141,4 +141,6 @@ def ask(request: Request, body: AskRequest) -> AskResponse:
             None, None, _index(request), chunks, body.question, f, body.top_k)
     info["retrieved"] = len(passages)
     llm = getattr(request.app.state, "llm", rag.groq_chat)
+    if llm is rag.groq_chat:
+        info["llm_model"] = rag.GROQ_MODEL
     return rag.answer(body.question, passages, llm, info)

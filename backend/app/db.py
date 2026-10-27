@@ -47,6 +47,14 @@ CREATE TABLE IF NOT EXISTS chunks (
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS extraction_status TEXT NOT NULL DEFAULT 'ok';
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS extraction_note TEXT;
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS page_starts INTEGER[];
+
+-- Free-use policy: one row per AI provider request sent from this installation (see app/usage.py)
+CREATE TABLE IF NOT EXISTS ai_usage (
+    id      BIGSERIAL PRIMARY KEY,
+    at      TIMESTAMPTZ NOT NULL,
+    outcome TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ai_usage_at ON ai_usage (at);
 """
 
 COLUMNS = list(Document.model_fields)

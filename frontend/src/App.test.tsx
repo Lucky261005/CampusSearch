@@ -290,6 +290,18 @@ describe('ask', () => {
     expect(screen.getByText(/does not guarantee the answer is correct/)).toBeInTheDocument()
   })
 
+  test('answers citing a supplied document warn that its source is unverified', async () => {
+    const supplied = { ...source(1), provenance: 'supplied_document' as const, source_url: 'supplied://n/NSP.pdf' }
+    fetchMock.mockReturnValueOnce(json(askBody({
+      citations: [{ ...supplied, quote: 'Students register through the portal' }],
+      sources: [supplied, source(2)],
+    })))
+    render(<App />)
+    openAskAndSubmit()
+    expect(await screen.findByText(/cites a supplied document whose official source has not been verified/)).toBeInTheDocument()
+    expect(screen.queryByText(/cites illustrative sample records/i)).toBeNull()
+  })
+
   test('citation markers that do not match a returned citation are not linked', async () => {
     fetchMock.mockReturnValueOnce(json(askBody({ answer: 'See [1] and [7].' })))
     render(<App />)
