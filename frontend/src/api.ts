@@ -60,9 +60,12 @@ export function search(
   filters: Filters,
   offset: number,
   signal?: AbortSignal,
+  includeIllustrative = false,
 ): Promise<SearchResponse> {
   const params = new URLSearchParams({ q, mode, limit: String(PAGE_SIZE), offset: String(offset) })
   for (const [k, v] of filterEntries(filters)) params.set(k, v.trim())
+  // the backend excludes synthetic sample records unless asked
+  if (includeIllustrative) params.set('include_illustrative', 'true')
   return request<SearchResponse>(
     `/api/search?${params}`,
     { signal },
@@ -70,9 +73,15 @@ export function search(
   )
 }
 
-export function ask(question: string, filters: Filters, signal?: AbortSignal): Promise<AskResponse> {
-  const f: Record<string, string | number> = {}
+export function ask(
+  question: string,
+  filters: Filters,
+  signal?: AbortSignal,
+  includeIllustrative = false,
+): Promise<AskResponse> {
+  const f: Record<string, string | number | boolean> = {}
   for (const [k, v] of filterEntries(filters)) f[k] = k === 'semester' ? Number(v) : v.trim()
+  if (includeIllustrative) f.include_illustrative = true
   return request<AskResponse>(
     '/api/ask',
     {

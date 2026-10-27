@@ -19,7 +19,9 @@ HEADER_FOOTER_SHARE = 0.6  # a line on >= 60% of pages (3+ pages) is a header/fo
 
 
 class PdfError(Exception):
-    pass
+    def __init__(self, message: str, scanned: bool = False):
+        super().__init__(message)
+        self.scanned = scanned  # readable PDF without a usable text layer (OCR may help)
 
 
 @dataclass
@@ -27,6 +29,36 @@ class PdfText:
     title: str | None
     pages: list[str]
     warnings: list[str] = field(default_factory=list)
+
+
+GLUED_MIN_LETTERS = 19  # a run of 19+ letters is almost never a real English word
+_GLUED = re.compile(rf"[A-Za-z]{{{GLUED_MIN_LETTERS},}}")
+
+
+def glued_words(text: str) -> int:
+    """Count letter runs long enough to be several words with their spaces lost."""
+    return len(_GLUED.findall(text))
+
+
+def choose_page_text(plain: str, layout) -> tuple[str, bool]:
+    """Keep pypdf's plain text unless it has lost word spacing and layout mode repairs it.
+
+    `layout` is a zero-argument callable, so the slower layout extraction only runs for pages
+    that need it. Plain text is preferred because layout mode can detach table cells (e.g. a
+    calendar date from its event).
+    """
+    if glued_words(plain) == 0:
+        return plain, False
+    alt = layout() or ""
+    # a spacing repair adds spaces; it must not lose content (empty or truncated layout output)
+    keeps_content = _alnum(alt) >= 0.95 * _alnum(plain)
+    if keeps_content and glued_words(alt) < glued_words(plain):
+        return alt, True
+    return plain, False
+
+
+def _alnum(text: str) -> int:
+    return sum(ch.isalnum() for ch in text)
 
 
 _PAGE_NUMBER = re.compile(r"^(page\s*)?\d{1,4}(\s*(of|/)\s*\d{1,4})?$", re.I)
@@ -73,7 +105,15 @@ def extract_pdf(data: bytes) -> PdfText:
         reader = pypdf.PdfReader(io.BytesIO(data))
         if reader.is_encrypted:
             raise PdfError("PDF is encrypted")
-        raw = [page.extract_text() or "" for page in reader.pages]
+        raw, relaid, still_glued = [], [], []
+        for n, page in enumerate(reader.pages, start=1):
+            text, used_layout = choose_page_text(
+                page.extract_text() or "", lambda p=page: p.extract_text(extraction_mode="layout"))
+            raw.append(text)
+            if used_layout:
+                relaid.append(n)
+            elif glued_words(text):
+                still_glued.append(n)
         title = (reader.metadata or {}).get("/Title")
     except PdfError:
         raise
@@ -83,10 +123,15 @@ def extract_pdf(data: bytes) -> PdfText:
         raise PdfError("PDF has no pages")
 
     pages, warnings = clean_pages(raw)
+    if relaid:
+        warnings.append(f"word spacing repaired with layout extraction on page(s) {relaid[:10]}")
+    if still_glued:
+        warnings.append(f"possible missing word spaces on {len(still_glued)} page(s) "
+                        f"{still_glued[:10]}; needs manual inspection")
     total = sum(len(p) for p in pages)
     if total < MIN_TOTAL_CHARS:
         raise PdfError(f"only {total} characters of text extracted; the PDF is probably "
-                       "scanned or image-based (OCR is not supported)")
+                       "scanned or image-based (ingest with --ocr if OCR is installed)", scanned=True)
     low = [i + 1 for i, p in enumerate(pages) if len(p) < LOW_TEXT_PER_PAGE]
     if low:
         warnings.append(f"little or no text on page(s) {low[:10]}; content may be in images")

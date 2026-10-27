@@ -14,7 +14,7 @@ from app.embeddings import chunk_document
 from app.ingest import (IngestError, build_document, distinct_words, ingest_document,
                         ingest_records, manifest_records, pdf_to_record, prune, read_zip,
                         zip_records)
-from app.pdf import PdfError, clean_pages, extract_pdf, join_pages
+from app.pdf import PdfError, choose_page_text, clean_pages, extract_pdf, glued_words, join_pages
 from app.reindex import index_documents
 from app.retrieval import Filters, semantic
 from pdf_factory import make_pdf
@@ -46,6 +46,62 @@ def test_clean_pages_repairs_drop_caps_letter_spacing_and_hyphenation():
     pages, _ = clean_pages(["C\nommencement of classes", "T h i s  i s  a  n o t i c e  t o  s t u d e n t s",
                             "regis-\ntration opens"])
     assert pages == ["Commencement of classes", "This is a notice to students", "registration opens"]
+
+
+# Observed in the official "Guidelines for Entry and Exit" PDF (plain vs layout extraction).
+GLUED_PLAIN = ("CHRIST(DeemedtobeUniversity) GuidelinesforEntryandExitintoBachelorandMasterLevelProgrammes "
+               "I. PolicyThe Exit and Entry provisions are made inaccordance withthe National EducationPolicy 2020")
+SPACED_LAYOUT = ("CHRIST (Deemed to be University) Guidelines for Entry and Exit into Bachelor and Master Level "
+                 "Programmes I. Policy The Exit and Entry provisions are made in accordance with the National "
+                 "Education Policy 2020")
+# Observed in the official academic calendar: layout mode detaches the date from its event.
+CALENDAR_PLAIN = "June 2026 01 (Mon) Commencement of classes for V semester UG programmes"
+CALENDAR_LAYOUT = "June 2026 Commencement of classes for V semester UG programmes"
+
+
+def test_unrepaired_spacing_is_flagged_for_manual_inspection():
+    glued = make_pdf([["Students must read the following carefully before applying."
+                       " availableattheOfficeofStudentServices for all enquiries about admission."] * 3])
+    r = extract_pdf(glued)  # layout mode cannot split words the PDF itself stores glued
+    assert any("possible missing word spaces on 1 page(s) [1]; needs manual inspection" in w
+               for w in r.warnings)
+
+
+def test_glued_words_counts_only_long_letter_runs():
+    assert glued_words(GLUED_PLAIN) == 2 and glued_words(SPACED_LAYOUT) == 0
+    assert glued_words("Telecommunications 2026-27 CU:SFSC:Notice: 09/26-1") == 0
+
+
+def test_layout_text_used_only_when_it_repairs_spacing():
+    text, used = choose_page_text(GLUED_PLAIN, lambda: SPACED_LAYOUT)
+    assert used and "in accordance with the National Education Policy 2020" in text
+
+
+def test_clean_pages_keep_plain_text_and_never_run_layout():
+    def boom():
+        raise AssertionError("layout extraction should not run for a clean page")
+
+    assert choose_page_text(CALENDAR_PLAIN, boom) == (CALENDAR_PLAIN, False)
+    assert "01 (Mon) Commencement" in choose_page_text(CALENDAR_PLAIN, lambda: CALENDAR_LAYOUT)[0]
+
+
+def test_layout_not_used_when_it_is_no_better():
+    url_like = "Email: scholarship.support@christuniversityncrdelhicampus.in for help"
+    assert choose_page_text(url_like, lambda: url_like + " extra") == (url_like, False)
+    assert choose_page_text(GLUED_PLAIN, lambda: "") == (GLUED_PLAIN, False)  # empty layout output
+    truncated = SPACED_LAYOUT[: len(SPACED_LAYOUT) // 2]
+    assert choose_page_text(GLUED_PLAIN, lambda: truncated) == (GLUED_PLAIN, False)  # lost content
+
+
+def test_dates_names_and_identifiers_survive_cleaning():
+    sample = ["CU:SFSC:Notice: 09/26-1 16 September 2026 Dr. Jain Mathew MCom, MPhil, PhD "
+              "dean.management@christuniversity.in https://scholarships.gov.in 10 (Tue) Holiday- Balipadyami, "
+              "Deepavali 1.6 kms ₹ 8 lakhs 75% NAAC A+"]
+    [cleaned], _ = clean_pages(sample)
+    for token in ("CU:SFSC:Notice: 09/26-1", "16 September 2026", "Dr. Jain Mathew", "MCom, MPhil, PhD",
+                  "dean.management@christuniversity.in", "https://scholarships.gov.in",
+                  "10 (Tue) Holiday- Balipadyami, Deepavali", "1.6 kms", "₹ 8 lakhs", "75%", "NAAC A+"):
+        assert token in cleaned, token
 
 
 def test_join_pages_offsets_survive_empty_pages_and_normalization():
@@ -301,7 +357,7 @@ def test_fetch_dispatches_pdf_and_html_and_rejects_others(monkeypatch):
 
 
 def test_manifest_collects_errors_and_merges_metadata(monkeypatch):
-    def fake_fetch(url):
+    def fake_fetch(url, ocr=False):
         if "broken" in url:
             raise IngestError(f"fetch failed {url}: HTTP Error 404")
         return {"title": "Generic", "content": "c", "source_url": url + "?final",

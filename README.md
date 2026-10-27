@@ -16,6 +16,11 @@ Every document carries a provenance label:
 | `supplied_document` | A file supplied locally whose official URL could not be verified |
 | `illustrative` | A synthetic sample record written for this project. **Not official information** |
 
+**Corpus policy.** Illustrative records are excluded from search and Ask AI by default. They are only
+returned when a request opts in explicitly, through the UI checkbox "Include illustrative sample records",
+`include_illustrative=true` on `/api/search`, or `"include_illustrative": true` in `/api/ask` filters. Tests
+and the v1 benchmark opt in because their fixtures are illustrative.
+
 This is a student project and not an official CHRIST University service.
 
 ## Requirements
@@ -93,11 +98,30 @@ This removes one document and its chunks.
 
 **Restart the backend after ingesting.** The keyword index is built when the backend starts.
 
+### Optional: OCR for scanned PDFs
+
+Six official PDFs are scans with no text layer. They are marked `"ocr": true` in `data/sources.json` and are
+skipped unless you enable OCR. OCR runs locally on the CPU, needs no system packages, and takes about
+280 MB and roughly 10 seconds per page.
+
+```bash
+.venv/Scripts/python -m pip install -r requirements-ocr.txt
+.venv/Scripts/python -m app.ingest --manifest data/sources.json --prune --ocr --reindex
+```
+
+OCR output is stored with `extraction_status = 'warnings'` and a note giving the mean recognition confidence.
+A document is rejected if OCR yields fewer than 200 characters or a mean confidence below 0.75. OCR text can
+contain recognition errors, so treat answers drawn from it with care.
+
 ### Extraction failures
 
 Ingestion refuses documents rather than storing empty or misleading text:
 
-- PDFs with no text layer (scans) fail with "probably scanned or image-based (OCR is not supported)".
+- PDFs with no text layer (scans) fail with "probably scanned or image-based (ingest with --ocr if OCR is
+  installed)".
+- If plain extraction runs words together on a page, layout extraction is used for that page instead, but
+  only when it has fewer run-together words and keeps at least 95% of the text. Otherwise the plain text is
+  kept and the page is listed in `extraction_note` as needing manual inspection.
 - Poster PDFs whose only text is boilerplate shared with the rest of a ZIP are rejected.
 - Unreachable URLs and unsupported content types are reported as `skip:` lines.
 - PDFs where some pages have little text are stored with `extraction_status = 'warnings'` and a note.

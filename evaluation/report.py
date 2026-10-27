@@ -104,7 +104,14 @@ def render(r: dict, data: dict, analysis: Path = ANALYSIS) -> str:
         L.append(f"| {CHECK_NAMES.get(name, name)} | {ok}/{n} |")
     missed = [row["id"] for row in rc["per_query"] if row.get("evidence_retrieved") is False]
     gated = [row["id"] for row in rc["per_query"] if row.get("gated_before_llm")]
-    L += ["", f"- Answerable queries whose supporting chunk was **not** in the top {rc['top_k']}: "
+    with_ref = [row for row in rc["per_query"] if "evidence_retrieved" in row]
+    policy = r.get("corpus_policy", {}).get("include_illustrative")
+    L += ["", f"- **Supporting passage retrieved: {len(with_ref) - len(missed)}/{len(with_ref)}** "
+              "(answerable questions whose quoted evidence was among the passages sent to the model).",
+          "- Corpus policy: illustrative records "
+          + ("included" if policy else "excluded (the user-facing default)" if policy is False else "included (pre-6B)")
+          + ".",
+          f"- Answerable queries whose supporting chunk was **not** in the top {rc['top_k']}: "
               + (f"{', '.join(missed)} (no answer could be cited for these)." if missed else "none."),
           f"- Unanswerable queries refused by the similarity gate before any LLM call: {', '.join(gated) or 'none'}; "
           "the rest relied on the model's refusal and the number check."]

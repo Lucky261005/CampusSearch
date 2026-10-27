@@ -1,0 +1,4 @@
+# Optional OCR for scanned PDFs (CPU; about 280 MB installed, no system packages needed).
+# Install only if you want to ingest image-only PDFs: pip install -r requirements-ocr.txt
+rapidocr-onnxruntime==1.2.3
+pypdfium2==5.14.0

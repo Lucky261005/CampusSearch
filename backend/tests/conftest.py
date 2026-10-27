@@ -27,6 +27,24 @@ def _test_db() -> str:
     return TEST_DATABASE_URL
 
 
+class FixtureClient:
+    """TestClient whose requests opt in to illustrative records, which most fixtures are.
+    Normal API callers never see them unless they pass include_illustrative explicitly."""
+
+    def __init__(self, app):
+        from fastapi.testclient import TestClient
+
+        self._client = TestClient(app)
+
+    def get(self, url, params=None, **kw):
+        return self._client.get(url, params={"include_illustrative": True, **(params or {})}, **kw)
+
+    def post(self, url, json=None, **kw):
+        if isinstance(json, dict) and "question" in json:
+            json = {**json, "filters": {"include_illustrative": True, **json.get("filters", {})}}
+        return self._client.post(url, json=json, **kw)
+
+
 class FakeEmbedder:
     """Test-only stand-in: hashed bag-of-words, 384-dim, unit length. Never used at runtime."""
 

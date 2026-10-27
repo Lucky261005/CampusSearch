@@ -68,6 +68,29 @@ describe('search', () => {
     expect(screen.queryByRole('link', { name: /illustrative:/ })).toBeNull()
   })
 
+  test('illustrative records are excluded by default and only included on explicit opt-in', async () => {
+    fetchMock.mockReturnValueOnce(json(searchBody()))
+    render(<App />)
+    const box = screen.getByRole('checkbox', { name: /Include illustrative sample records/ })
+    expect(box).not.toBeChecked()
+    typeAndSearch('hostel fee')
+    await screen.findByText(/BM25 \d/)
+    expect(lastUrl().searchParams.has('include_illustrative')).toBe(false)
+
+    fetchMock.mockReturnValueOnce(json(searchBody()))
+    fireEvent.click(box) // re-runs the current search with the opt-in
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    expect(lastUrl().searchParams.get('include_illustrative')).toBe('true')
+
+    fetchMock.mockReturnValueOnce(json(askBody()))
+    fireEvent.click(screen.getByRole('tab', { name: 'Ask AI' }))
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Question' }), { target: { value: 'fee?' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ask' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
+    const body = JSON.parse((fetchMock.mock.calls[2][1] as RequestInit).body as string)
+    expect(body.filters).toEqual({ include_illustrative: true })
+  })
+
   test('supplied PDFs are labelled as unverified and not linked', async () => {
     fetchMock.mockReturnValueOnce(
       json(searchBody({ results: [hit({ provenance: 'supplied_document', source_type: 'pdf', source_url: 'supplied://scholarship-notices/NSP%20Notice.pdf' })] })),

@@ -32,7 +32,7 @@ from pydantic import ValidationError
 
 from app import db
 from app.models import Document
-from app.pdf import PdfError, extract_pdf, join_pages
+from app.pdf import PdfError, PdfText, clean_pages, extract_pdf, join_pages
 
 MAX_HTML_BYTES = 2_000_000
 MAX_PDF_BYTES = 25_000_000
@@ -218,12 +218,16 @@ def html_to_record(html: str, url: str) -> dict:
     }
 
 
-def pdf_to_record(data: bytes, url: str, provenance: str, title: str | None = None) -> dict:
-    """PDF bytes -> record with page offsets and extraction status. Raises IngestError."""
+def pdf_to_record(data: bytes, url: str, provenance: str, title: str | None = None,
+                  ocr: bool = False) -> dict:
+    """PDF bytes -> record with page offsets and extraction status. Raises IngestError.
+    With ocr=True, a PDF without a text layer is recognised with the optional OCR engine."""
     try:
         pdf = extract_pdf(data)
     except PdfError as e:
-        raise IngestError(f"PDF extraction failed for {url}: {e}") from None
+        if not (ocr and e.scanned):
+            raise IngestError(f"PDF extraction failed for {url}: {e}") from None
+        pdf = _ocr_text(data, url)
     content, starts = join_pages(pdf.pages)
     name = unquote(urlsplit(url).path.rsplit("/", 1)[-1]).removesuffix(".pdf")
     return {
@@ -239,7 +243,19 @@ def pdf_to_record(data: bytes, url: str, provenance: str, title: str | None = No
     }
 
 
-def fetch(url: str) -> dict:
+def _ocr_text(data: bytes, url: str) -> PdfText:
+    from app.ocr import OcrError, ocr_pdf
+
+    try:
+        raw_pages, confidence = ocr_pdf(data)
+    except OcrError as e:
+        raise IngestError(f"OCR failed for {url}: {e}") from None
+    pages, warnings = clean_pages(raw_pages)
+    return PdfText(None, pages, [f"text recognised by OCR (mean confidence {confidence:.2f}); "
+                                 "may contain recognition errors", *warnings])
+
+
+def fetch(url: str, ocr: bool = False) -> dict:
     """Fetch a public HTML page or PDF. No auth, no cookies; failures raise IngestError."""
     if not url.startswith(("http://", "https://")):
         raise IngestError(f"unsupported URL scheme: {url}")
@@ -257,7 +273,7 @@ def fetch(url: str) -> dict:
     if len(body) > limit:
         raise IngestError(f"{url}: larger than {limit // 1_000_000} MB")
     if "application/pdf" in ctype:
-        return pdf_to_record(body, final, "official_web")
+        return pdf_to_record(body, final, "official_web", ocr=ocr)
     if "text/html" in ctype:
         return html_to_record(body.decode(charset, errors="cp1252fallback"), final)
     raise IngestError(f"{url}: unsupported content type {ctype or 'unknown'}")
@@ -326,7 +342,7 @@ def distinct_words(texts: dict[str, str]) -> dict[str, int]:
     return out
 
 
-def zip_records(path: Path, collection: str) -> tuple[list[dict], list[str]]:
+def zip_records(path: Path, collection: str, ocr: bool = False) -> tuple[list[dict], list[str]]:
     """Records for the PDFs in a locally supplied ZIP. Their official URLs are unknown, so
     provenance is `supplied_document` and source_url is a stable `supplied://` reference."""
     members, problems = read_zip(path)
@@ -334,14 +350,15 @@ def zip_records(path: Path, collection: str) -> tuple[list[dict], list[str]]:
     for name, data in members:
         url = f"supplied://{collection}/{quote(name)}"
         try:
-            records[name] = pdf_to_record(data, url, "supplied_document",
+            records[name] = pdf_to_record(data, url, "supplied_document", ocr=ocr,
                                           title=name.removesuffix(".pdf"))
         except IngestError as e:
             problems.append(f"{name}: {e}")
     for name, n in distinct_words({n: r["content"] for n, r in records.items()}).items():
         if n < MIN_DISTINCT_WORDS:
             problems.append(f"{name}: only {n} words differ from text shared with the other "
-                            "files; the details are probably in images (OCR is not supported)")
+                            "files; the details are probably in images (--ocr only applies to "
+                            "PDFs with no text layer)")
             del records[name]
     return list(records.values()), problems
 
@@ -356,17 +373,24 @@ def load_manifest(path: Path) -> list[dict]:
     return data
 
 
-def manifest_records(entries: list[dict], delay_s: float = 1.0
+def manifest_records(entries: list[dict], delay_s: float = 1.0, ocr: bool = False
                      ) -> tuple[list[dict], list[str], set[str]]:
-    """Fetch each manifest source politely. Returns records, errors and all URLs to keep."""
+    """Fetch each manifest source politely. Returns records, errors and all URLs to keep.
+    Entries marked "ocr": true are scanned PDFs, fetched only when OCR is enabled."""
     records, errors, keep = [], [], set()
     meta_keys = ("title", "category", "campus", "programme", "semester", "publication_date")
-    for n, entry in enumerate(entries):
+    fetched = 0
+    for entry in entries:
         keep.add(entry["url"])
-        if n:
+        if entry.get("ocr") and not ocr:
+            errors.append(f"{entry['url']}: scanned PDF, needs OCR (install requirements-ocr.txt, "
+                          "then ingest with --ocr)")
+            continue
+        if fetched:
             time.sleep(delay_s)
+        fetched += 1
         try:
-            rec = fetch(entry["url"])
+            rec = fetch(entry["url"], ocr=bool(entry.get("ocr")))
         except IngestError as e:
             errors.append(str(e))
             continue
@@ -410,6 +434,8 @@ def main() -> None:
     ap.add_argument("--delete", action="append", default=[], metavar="SOURCE_URL",
                     help="delete a document and its chunks")
     ap.add_argument("--reindex", action="store_true", help="chunk and embed afterwards")
+    ap.add_argument("--ocr", action="store_true",
+                    help="recognise scanned PDFs with OCR (optional: pip install -r requirements-ocr.txt)")
     args = ap.parse_args()
     if args.prune and not args.manifest:
         ap.error("--prune requires --manifest")
@@ -421,11 +447,11 @@ def main() -> None:
         for path in args.json_files:
             records += load_json_records(path)
         if args.manifest:
-            got, errs, keep = manifest_records(load_manifest(args.manifest))
+            got, errs, keep = manifest_records(load_manifest(args.manifest), ocr=args.ocr)
             records += got
             errors += errs
         if args.zip:
-            got, errs = zip_records(args.zip, args.collection)
+            got, errs = zip_records(args.zip, args.collection, ocr=args.ocr)
             for rec in got:
                 rec["category"] = args.category
             records += got
@@ -434,7 +460,7 @@ def main() -> None:
         sys.exit(f"error: {e}")
     for url in args.url:
         try:
-            records.append(fetch(url))
+            records.append(fetch(url, ocr=args.ocr))
         except IngestError as e:
             errors.append(str(e))
 

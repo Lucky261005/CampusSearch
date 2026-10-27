@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.ingest import build_document, load_json_records
 from app.main import app
+from conftest import FixtureClient
 from app.search import SearchIndex
 
 SEED = Path(__file__).parents[1] / "data" / "seed_documents.json"
@@ -14,7 +15,7 @@ SEED = Path(__file__).parents[1] / "data" / "seed_documents.json"
 def client():
     # no lifespan: the index is injected, so API tests need no database
     app.state.index = SearchIndex([build_document(r) for r in load_json_records(SEED)])
-    yield TestClient(app)
+    yield FixtureClient(app)
     del app.state.index
 
 

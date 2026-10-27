@@ -7,6 +7,7 @@ from app import db, embeddings
 from app.embeddings import chunk_text
 from app.ingest import build_document, ingest_document, ingest_records, load_json_records
 from app.main import app
+from conftest import FixtureClient
 from app.reindex import index_documents
 from app.retrieval import Filters, hybrid, keyword, rrf, semantic
 from app.search import SearchIndex
@@ -97,28 +98,28 @@ def test_semantic_orders_by_similarity_and_filters(conn, fake_embedder):
         rec("u:mixed", "hostel library", campus="Central", semester=1),
     ])
     index_documents(conn, fake_embedder)
-    hits = semantic(conn, fake_embedder, "hostel rules", Filters())
+    hits = semantic(conn, fake_embedder, "hostel rules", Filters(include_illustrative=True))
     assert [h.doc.source_url for h in hits][:2] == ["u:hostel", "u:mixed"]
     assert hits[0].similarity > hits[1].similarity and hits[0].chunk_id
     assert [h.doc.source_url for h in
-            semantic(conn, fake_embedder, "hostel", Filters(campus="central"))] == \
+            semantic(conn, fake_embedder, "hostel", Filters(campus="central", include_illustrative=True))] == \
         ["u:mixed", "u:library"]
     assert [h.doc.source_url for h in
-            semantic(conn, fake_embedder, "hostel", Filters(campus="Central", semester=1))] == \
+            semantic(conn, fake_embedder, "hostel", Filters(campus="Central", semester=1, include_illustrative=True))] == \
         ["u:mixed"]
-    assert semantic(conn, fake_embedder, "   ", Filters()) == []
+    assert semantic(conn, fake_embedder, "   ", Filters(include_illustrative=True)) == []
 
 
 def test_hybrid_fuses_and_attaches_chunks(conn, fake_embedder):
     ingest_records(conn, load_json_records(SEED))
     index_documents(conn, fake_embedder)
     index = SearchIndex(db.all_documents(conn))
-    hits = hybrid(conn, fake_embedder, index, "hostel accommodation", Filters())
+    hits = hybrid(conn, fake_embedder, index, "hostel accommodation", Filters(include_illustrative=True))
     assert hits[0].doc.source_url.endswith("/hostel")
     assert all(h.chunk_id for h in hits)  # every doc is indexed, so evidence is a chunk
     scores = [h.score for h in hits]
     assert scores == sorted(scores, reverse=True)
-    kw = {p.doc.id for p in keyword(index, "hostel accommodation", Filters())}
+    kw = {p.doc.id for p in keyword(index, "hostel accommodation", Filters(include_illustrative=True))}
     assert kw <= {h.doc.id for h in hits}
 
 
@@ -131,7 +132,7 @@ def client(conn, fake_embedder, _test_db):
     app.state.index = SearchIndex(db.all_documents(conn))
     app.state.embedder = fake_embedder
     app.state.db_url = _test_db
-    yield TestClient(app)
+    yield FixtureClient(app)
     for attr in ("index", "embedder", "db_url"):
         delattr(app.state, attr)
 

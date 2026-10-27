@@ -33,7 +33,8 @@ os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 from app import db, rag  # noqa: E402
 from app.embeddings import MODEL_NAME, get_embedder  # noqa: E402
-from app.retrieval import Filters, hybrid, keyword, semantic  # noqa: E402
+from app.retrieval import (Filters, answer_passages, hybrid, keyword,  # noqa: E402
+                           load_chunk_index, semantic)
 from app.search import SearchIndex  # noqa: E402
 from evaluation.metrics import mean, ndcg_at_k, percentile, recall_at_k, reciprocal_rank  # noqa: E402
 from evaluation.report import render  # noqa: E402
@@ -52,11 +53,19 @@ def norm(text: str) -> str:
 
 
 # Each benchmark version keeps its own dataset, results and report; v1 is the Phase 5 baseline.
+# `frozen` runs are historical baselines: never rerun or overwritten (the code they were
+# measured with has since changed). `include_illustrative` is the corpus policy the run used.
 BENCHMARKS = {
     "v1": {"queries": EVAL / "queries.json", "json": EVAL / "results" / "results.json",
-           "md": EVAL / "RESULTS.md", "analysis": EVAL / "analysis.md"},
+           "md": EVAL / "RESULTS.md", "analysis": EVAL / "analysis.md",
+           "include_illustrative": True, "frozen": True},
     "v2": {"queries": EVAL / "v2" / "queries.json", "json": EVAL / "results" / "v2" / "results.json",
-           "md": EVAL / "RESULTS_v2.md", "analysis": EVAL / "v2" / "analysis.md"},
+           "md": EVAL / "RESULTS_v2.md", "analysis": EVAL / "v2" / "analysis.md",
+           "include_illustrative": True, "frozen": True},
+    # Phase 6B: same v2 questions; user-facing corpus policy and passage-level answer evidence
+    "v2-6b": {"queries": EVAL / "v2" / "queries.json", "json": EVAL / "results" / "v2_6b" / "results.json",
+              "md": EVAL / "RESULTS_v2_6b.md", "analysis": EVAL / "v2_6b" / "analysis.md",
+              "include_illustrative": False, "frozen": False},
 }
 
 
@@ -223,13 +232,14 @@ def citation_problems(res, conn) -> list[str]:
     return problems
 
 
-def evaluate_rag(conn, embedder, index, data) -> dict:
+def evaluate_rag(conn, embedder, index, chunk_index, data) -> dict:
     mode = "hybrid" if embedder else "keyword"
     rows = []
     for q in data["queries"]:
         filters = Filters(**q.get("filters", {}))
-        passages = (hybrid(conn, embedder, index, q["query"], filters) if embedder
-                    else keyword(index, q["query"], filters, width=1200))[:TOP_K_ASK]
+        # exactly what /api/ask sends to the model
+        passages, _ = answer_passages(conn if embedder else None, embedder, index, chunk_index,
+                                      q["query"], filters, TOP_K_ASK)
         info = {"mode": mode}
         row = {"id": q["id"], "type": q["type"], "checks": {}}
 
@@ -318,7 +328,8 @@ def evaluate_groq(conn, embedder, index, data, price_in, price_out) -> dict:
 
     rows = []
     for q in data["queries"]:
-        passages = hybrid(conn, embedder, index, q["query"], Filters(**q.get("filters", {})))[:TOP_K_ASK]
+        passages, _ = answer_passages(conn, embedder, index, load_chunk_index(conn), q["query"],
+                                      Filters(**q.get("filters", {})), TOP_K_ASK)
         before = len(usage_log)
         t = time.perf_counter()
         try:
@@ -356,17 +367,20 @@ def main() -> None:
 
     paths = BENCHMARKS[args.benchmark]
     data = load_dataset(paths["queries"])
+    for q in data["queries"]:  # apply the run's corpus policy to every retrieval call
+        q["filters"] = {**q.get("filters", {}), "include_illustrative": paths["include_illustrative"]}
     with db.connect() as conn:
         docs = {d.id: d for d in db.all_documents(conn)}
         validate_dataset(data, docs)
         index = SearchIndex(list(docs.values()))
         snap = snapshot(conn)
+        if paths["frozen"]:
+            sys.exit(f"refusing to run: {args.benchmark} is a frozen historical baseline. Add a new "
+                     "entry to BENCHMARKS for a new measurement.")
         if paths["json"].exists() and not args.overwrite:
             saved = json.loads(paths["json"].read_text(encoding="utf-8"))["corpus"]["fingerprint"]
-            if saved != snap["fingerprint"]:
-                sys.exit(f"refusing to overwrite: saved {args.benchmark} results were measured on corpus "
-                         f"{saved}, the database is now {snap['fingerprint']}. Saved results are kept "
-                         "as history; pass --overwrite to replace them deliberately.")
+            sys.exit(f"refusing to overwrite saved {args.benchmark} results (corpus {saved}; database "
+                     f"now {snap['fingerprint']}). Pass --overwrite to replace them deliberately.")
 
         t = time.perf_counter()
         embedder, error = get_embedder()
@@ -389,7 +403,8 @@ def main() -> None:
             "latency": {"repeats": args.repeats, "warmup_passes": 1,
                         "measured": "in-process retrieval call (query embedding + SQL / BM25 + snippets); excludes HTTP",
                         "modes": benchmark(modes, conn, embedder, index, data, args.repeats)},
-            "rag_checks": evaluate_rag(conn, embedder, index, data),
+            "rag_checks": evaluate_rag(conn, embedder, index, load_chunk_index(conn), data),
+            "corpus_policy": {"include_illustrative": paths["include_illustrative"]},
             "groq": (evaluate_groq(conn, embedder, index, data, args.price_in, args.price_out)
                      if args.groq else {"status": "not run", "reason": "pass --groq with GROQ_API_KEY set"}),
         }

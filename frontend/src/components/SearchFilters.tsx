@@ -7,12 +7,22 @@ interface Props {
   onReset: () => void
   pending: boolean // draft differs from what the visible results used
   applyLabel: string
+  includeIllustrative: boolean
+  onIncludeIllustrative: (on: boolean) => void
 }
 
 const input =
   'h-9 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-slate-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15'
 
-export function SearchFilters({ value, onChange, onReset, pending, applyLabel }: Props) {
+export function SearchFilters({
+  value,
+  onChange,
+  onReset,
+  pending,
+  applyLabel,
+  includeIllustrative,
+  onIncludeIllustrative,
+}: Props) {
   const set = (k: keyof Filters) => (e: { target: { value: string } }) =>
     onChange({ ...value, [k]: e.target.value })
   const [open, setOpen] = useState(false) // small screens only; always shown from lg up
@@ -78,6 +88,18 @@ export function SearchFilters({ value, onChange, onReset, pending, applyLabel }:
       <p className="mt-3 text-xs leading-relaxed text-muted">
         Text filters match exactly (case-insensitive). Date filters exclude undated records.
       </p>
+      <label className="mt-3 flex items-start gap-2 border-t border-line pt-3 text-xs text-ink-soft">
+        <input
+          type="checkbox"
+          checked={includeIllustrative}
+          onChange={(e) => onIncludeIllustrative(e.target.checked)}
+          className="mt-0.5 size-3.5 accent-amber-600"
+        />
+        <span>
+          Include illustrative sample records
+          <span className="block text-muted">Synthetic demo data, not official information.</span>
+        </span>
+      </label>
       </div>
       {badRange && <p role="alert" className="mt-2 text-xs font-medium text-red-700">“From” must be on or before “to”.</p>}
       {pending && !badRange && (

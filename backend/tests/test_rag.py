@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from app import db, rag
 from app.ingest import build_document, ingest_records, load_json_records
 from app.main import app
+from conftest import FixtureClient
 from app.rag import LLMUnavailable, answer, groq_chat
 from app.reindex import index_documents
 from app.retrieval import Passage
@@ -215,7 +216,7 @@ def client(conn, fake_embedder, _test_db):
     app.state.index = SearchIndex(db.all_documents(conn))
     app.state.embedder = fake_embedder
     app.state.db_url = _test_db
-    yield TestClient(app)
+    yield FixtureClient(app)
     for attr in ("index", "embedder", "db_url", "llm"):
         if hasattr(app.state, attr):
             delattr(app.state, attr)

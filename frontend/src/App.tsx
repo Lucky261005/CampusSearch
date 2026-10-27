@@ -21,11 +21,13 @@ interface SearchRequest {
   mode: SearchMode
   filters: Filters
   offset: number
+  includeIllustrative: boolean
 }
 
 interface AskRequest {
   question: string
   filters: Filters
+  includeIllustrative: boolean
 }
 
 const SEARCH_EXAMPLES = ['academic calendar', 'hostel accommodation', 'exam registration', 'scholarships']
@@ -57,8 +59,9 @@ function useRequest<R, T>(req: R | null, run: (r: R, signal: AbortSignal) => Pro
   return state
 }
 
-const runSearch = (r: SearchRequest, s: AbortSignal) => search(r.q, r.mode, r.filters, r.offset, s)
-const runAsk = (r: AskRequest, s: AbortSignal) => ask(r.question, r.filters, s)
+const runSearch = (r: SearchRequest, s: AbortSignal) =>
+  search(r.q, r.mode, r.filters, r.offset, s, r.includeIllustrative)
+const runAsk = (r: AskRequest, s: AbortSignal) => ask(r.question, r.filters, s, r.includeIllustrative)
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('search')
@@ -66,6 +69,7 @@ export default function App() {
   const [question, setQuestion] = useState('')
   const [mode, setMode] = useState<SearchMode>('keyword')
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
+  const [includeIllustrative, setIncludeIllustrative] = useState(false)
 
   const [searchReq, setSearchReq] = useState<SearchRequest | null>(null)
   const [askReq, setAskReq] = useState<AskRequest | null>(null)
@@ -81,16 +85,21 @@ export default function App() {
   const submitSearch = (q = query) => {
     if (badRange) return
     setQuery(q)
-    setSearchReq({ q: q.trim(), mode, filters, offset: 0 })
+    setSearchReq({ q: q.trim(), mode, filters, offset: 0, includeIllustrative })
   }
   const submitAsk = (q = question) => {
     if (badRange) return
     setQuestion(q)
-    setAskReq({ question: q.trim(), filters })
+    setAskReq({ question: q.trim(), filters, includeIllustrative })
   }
   const changeMode = (m: SearchMode) => {
     setMode(m)
     if (searchReq) setSearchReq({ ...searchReq, mode: m, offset: 0 })
+  }
+  const changeIllustrative = (on: boolean) => {
+    setIncludeIllustrative(on)
+    if (tab === 'search' && searchReq) setSearchReq({ ...searchReq, includeIllustrative: on, offset: 0 })
+    if (tab === 'ask' && askReq) setAskReq({ ...askReq, includeIllustrative: on })
   }
   const resetFilters = () => {
     setFilters(EMPTY_FILTERS)
@@ -159,10 +168,13 @@ export default function App() {
             onReset={resetFilters}
             pending={pending}
             applyLabel={tab === 'search' ? 'Search' : 'Ask'}
+            includeIllustrative={includeIllustrative}
+            onIncludeIllustrative={changeIllustrative}
           />
           <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
-            Most records in this demo corpus are <strong>illustrative samples</strong>, not official
-            university information. Each result is labelled with its provenance.
+            Results come from official university pages and documents, plus a few supplied notices
+            whose official source could not be verified. Each result is labelled with its provenance.
+            Illustrative sample records are hidden unless you include them.
           </p>
         </aside>
 
