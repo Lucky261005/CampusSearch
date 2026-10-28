@@ -80,7 +80,7 @@ PowerShell. Steps 4 and 5 download about 1 GB of Python packages and fetch publi
 **1. Get the code**
 
 ```powershell
-git clone <repository-url> CampusSearch
+git clone https://github.com/Lucky261005/CampusSearch.git
 cd CampusSearch
 ```
 
