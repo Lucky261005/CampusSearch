@@ -26,6 +26,54 @@ returned when a request opts in explicitly, through the UI checkbox "Include ill
 `include_illustrative=true` on `/api/search`, or `"include_illustrative": true` in `/api/ask` filters. Tests
 and the v1 benchmark opt in because their fixtures are illustrative.
 
+It is a student portfolio project, built as a working local application. Its evaluation numbers come from
+a small question set written by the author, so they are not evidence of real-world search quality.
+
+## What problem it solves
+
+University information is spread across many web pages and PDFs: calendars, handbooks, regulations and
+notices. A student often doesn't know which document holds the answer. Generic AI chatbots will happily
+invent a fee, a date or a rule. CampusSearch searches the official documents directly. When it does
+answer, it shows exactly which passage each claim comes from, and it refuses to answer when the documents
+don't say.
+
+**Intended users:** students and staff who want answers they can verify against the university's own
+documents, and developers studying retrieval and grounded-answer techniques.
+
+## Features
+
+- **Three retrieval modes:** keyword (a BM25 engine written from scratch), semantic (pgvector), and hybrid
+  (Reciprocal Rank Fusion).
+- **Filters** for campus, category, programme, semester and publication date, plus pagination.
+- **Citation-grounded Ask AI:** every citation must quote the retrieved source verbatim, and numbers not
+  found in the cited text cause the answer to be rejected. The UI warns when an answer relies on an
+  illustrative or unverified source.
+- **Provenance labels** on every document, with illustrative sample data excluded by default.
+- **Ingestion** of HTML pages and PDFs (with page numbers), safe ZIP reading, deduplication and change
+  detection; optional local OCR for scanned PDFs.
+- **Free by default:** everything runs locally, and AI is optional, uses your own key, and has local daily
+  and per-minute limits.
+- **Evaluation suite:** Recall@5, nDCG@10, MRR, citation-integrity checks and latency, with frozen
+  historical benchmarks.
+
+## Architecture
+
+React frontend → FastAPI backend → PostgreSQL + pgvector, all local. The keyword index lives in memory;
+chunk embeddings and the local AI quota live in Postgres. Ask AI retrieves passages first, then optionally
+calls Groq and checks every citation in code. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
+[docs/API.md](docs/API.md).
+
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, Vitest + Testing Library |
+| Backend | Python 3.13, FastAPI, Pydantic, psycopg 3, pytest |
+| Search | Custom BM25 inverted index; PostgreSQL 16 + pgvector; Sentence Transformers (`all-MiniLM-L6-v2`) |
+| Documents | pypdf; optional RapidOCR (ONNX) + pypdfium2 |
+| AI (optional) | Groq Chat Completions over `httpx` (no SDK) |
+| Tooling | Docker Compose (database), GitHub Actions CI |
+
 ## Cost: ₹0 by design
 
 Everything needed to run CampusSearch is free and local:
@@ -288,6 +336,42 @@ The answers are written to `evaluation/private/groq_ask_log.json`, which is giti
 
 `evaluation.run --groq` would make one request per benchmark question (up to 26). It also obeys the local
 limits and stops at the first limit, so run it only deliberately.
+
+## Project structure
+
+```
+backend/
+  app/            FastAPI app: ingestion, PDF/OCR, BM25, retrieval, RAG, local AI quota
+  data/           sources.json (official source list), SOURCES.md, illustrative seed records
+  tests/          pytest suite (mocked AI provider, isolated test database)
+evaluation/       benchmark questions, metrics, runner, saved results (v1, v2, v2-6b)
+frontend/src/     React app: search, Ask AI, filters, components, tests
+docs/             architecture and API reference
+docker-compose.yml  local PostgreSQL + pgvector
+```
+
+## Known limitations
+
+- **Small, author-built evaluation.** The benchmark has 26 questions, written after reading the corpus.
+  The six OCR documents are not yet in its relevance judgments.
+- **Two known retrieval misses.** In each, the right document is found but not the right passage. They are
+  tracked as expected failures in `evaluation/test_passages_v2.py`.
+- **Unreliable off-topic gate.** It uses a similarity threshold, and some unrelated questions score just
+  above it. The final refusal then depends on the model and the citation checks.
+- **Corpus gaps.** Some official PDFs are scans (OCR is optional and imperfect). A few pages carry their
+  content in images or JavaScript and are not ingested. The student handbook has words run together on some
+  pages.
+- **Limited real-model testing.** Real Groq answers were checked by the author on only seven requests.
+  Passing the citation checks does not guarantee that an answer is correct.
+- **Keyword index refresh.** The keyword index refreshes only when the backend restarts.
+
+## Documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): components, ingestion, retrieval and answer pipeline
+- [docs/API.md](docs/API.md): endpoints, parameters and responses
+- [backend/data/SOURCES.md](backend/data/SOURCES.md): what is ingested, and what was rejected and why
+- [evaluation/RESULTS_v2_6b.md](evaluation/RESULTS_v2_6b.md): latest benchmark and its caveats
+- [evaluation/MANUAL_REVIEW.md](evaluation/MANUAL_REVIEW.md): review of real AI answers
 
 ## License
 
